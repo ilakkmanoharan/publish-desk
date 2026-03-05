@@ -1,0 +1,9 @@
+@private
+private/
+.env
+.env.local
+node_modules/
+.next/
+out/
+*.db
+prisma/*.db

@@ -1,0 +1,73 @@
+// Publish Desk — Database schema
+// SQLite for simplicity; can switch to PostgreSQL later
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id     String    @id @default(cuid())
+  name   String
+  slug   String    @unique
+  content Content[]
+}
+
+model Content {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  body        String
+  excerpt     String?
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  tags        ContentTag[]
+  publications Publication[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Tag {
+  id      String       @id @default(cuid())
+  name    String       @unique
+  content ContentTag[]
+}
+
+model ContentTag {
+  contentId String
+  tagId     String
+  content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  @@id([contentId, tagId])
+}
+
+model Magazine {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  imageUrl    String?
+  notes       String?
+  publications Publication[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Publication {
+  id           String    @id @default(cuid())
+  contentId    String
+  magazineId   String
+  status       String    // Draft | Scheduled | Published
+  scheduledAt  DateTime?
+  publishedAt  DateTime?
+  content      Content   @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  magazine     Magazine  @relation(fields: [magazineId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([contentId, magazineId])
+}
