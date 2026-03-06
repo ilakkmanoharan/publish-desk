@@ -45,12 +45,14 @@ export function ContentList({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-4 items-center">
-        <span className="text-muted text-sm">Category:</span>
+      <div className="flex flex-wrap gap-3 items-center">
+        <span className="text-muted text-sm font-medium">Category:</span>
         <button
           onClick={() => setCategory(null)}
-          className={`px-3 py-1 rounded text-sm ${
-            !selectedCategory ? "bg-accent text-background" : "bg-card text-muted hover:text-foreground"
+          className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+            !selectedCategory
+              ? "bg-neutral-800 text-white"
+              : "bg-background border border-border text-muted hover:text-foreground hover:bg-neutral-50"
           }`}
         >
           All
@@ -59,8 +61,10 @@ export function ContentList({
           <button
             key={c.id}
             onClick={() => setCategory(c.slug)}
-            className={`px-3 py-1 rounded text-sm ${
-              selectedCategory === c.slug ? "bg-accent text-background" : "bg-card text-muted hover:text-foreground"
+            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+              selectedCategory === c.slug
+                ? "bg-neutral-800 text-white"
+                : "bg-background border border-border text-muted hover:text-foreground hover:bg-neutral-50"
             }`}
           >
             {c.name}{c._count != null ? ` (${c._count.content})` : ""}
@@ -68,15 +72,15 @@ export function ContentList({
         ))}
       </div>
       <div className="flex flex-wrap gap-2 items-center">
-        <span className="text-muted text-sm">Tags:</span>
+        <span className="text-muted text-sm font-medium">Tags:</span>
         {allTags.map((t) => (
           <button
             key={t.name}
             onClick={() => toggleTag(t.name)}
-            className={`px-3 py-1 rounded text-sm border ${
+            className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
               selectedTags.includes(t.name)
-                ? "border-accent bg-accent/10 text-accent"
-                : "border-border text-muted hover:text-foreground"
+                ? "border-neutral-800 bg-neutral-100 text-foreground"
+                : "border-border text-muted hover:text-foreground hover:bg-neutral-50"
             }`}
           >
             {t.name}
@@ -87,7 +91,7 @@ export function ContentList({
         {content.map((item) => (
           <li
             key={item.id}
-            className="flex items-center justify-between p-4 rounded-lg bg-card border border-border"
+            className="flex items-center justify-between p-4 rounded-lg bg-background border border-border hover:border-neutral-300 transition-colors"
           >
             <div>
               <Link
@@ -102,7 +106,7 @@ export function ContentList({
                   {item.tags.map(({ tag }) => (
                     <span
                       key={tag.name}
-                      className="text-xs px-2 py-0.5 rounded bg-border text-muted"
+                      className="text-xs px-2 py-0.5 rounded-md bg-neutral-100 text-muted"
                     >
                       {tag.name}
                     </span>
@@ -112,7 +116,7 @@ export function ContentList({
             </div>
             <Link
               href={`/dashboard/content/${item.id}`}
-              className="text-sm text-muted hover:text-accent"
+              className="text-sm text-muted hover:text-accent transition-colors"
             >
               Assign to magazine →
             </Link>
@@ -120,7 +124,18 @@ export function ContentList({
         ))}
       </ul>
       {content.length === 0 && (
-        <p className="text-muted">No content found. Add content from your library or run the import script.</p>
+        <div className="rounded-xl bg-neutral-50 border border-border p-6 text-center">
+          <p className="text-muted mb-3">No content yet.</p>
+          <p className="text-sm text-foreground mb-4">
+            Connect a GitHub repo in <Link href="/dashboard/source" className="text-accent font-medium hover:underline">Content source</Link> to sync .md files, or add content manually.
+          </p>
+          <Link
+            href="/dashboard/source"
+            className="inline-block px-4 py-2 rounded-lg bg-neutral-800 text-white text-sm font-medium hover:bg-neutral-900 transition-colors"
+          >
+            Go to Content source
+          </Link>
+        </div>
       )}
     </div>
   );

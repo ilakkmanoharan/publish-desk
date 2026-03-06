@@ -2,6 +2,9 @@
 private/
 .env
 .env.local
+
+# Documentation (keep .md files in private/ so they are not pushed to GitHub)
+*.md
 node_modules/
 .next/
 out/

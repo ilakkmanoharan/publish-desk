@@ -1,3 +1,4 @@
+import { readFileSync } from "fs";
 import { getApps, initializeApp, cert, type ServiceAccount } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
@@ -7,6 +8,15 @@ function getCredential() {
   if (json) {
     try {
       return cert(JSON.parse(json) as ServiceAccount);
+    } catch {
+      return undefined;
+    }
+  }
+  const path = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+  if (path) {
+    try {
+      const raw = readFileSync(path, "utf-8");
+      return cert(JSON.parse(raw) as ServiceAccount);
     } catch {
       return undefined;
     }
@@ -21,7 +31,7 @@ export function getAdminApp() {
   const cred = getCredential();
   if (!cred) {
     throw new Error(
-      "Firebase Admin requires FIREBASE_SERVICE_ACCOUNT_JSON env var (stringified service account JSON)"
+      "Firebase Admin requires FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_PATH env var. See FIREBASE_SETUP.md §5."
     );
   }
   return initializeApp({

@@ -64,26 +64,31 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Content library</h1>
-        <Link
-          href="/dashboard/content/new"
-          className="px-4 py-2 rounded bg-accent text-background text-sm font-medium hover:opacity-90"
-        >
-          New content
-        </Link>
+    <div className="max-w-4xl">
+      <div className="rounded-2xl bg-card border border-border shadow-lg shadow-black/5 p-6 md:p-8">
+        <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+          <h1 className="text-2xl font-bold text-foreground">Content library</h1>
+          <Link
+            href="/dashboard/content/new"
+            className="px-4 py-2.5 rounded-lg bg-neutral-800 text-white text-sm font-medium hover:bg-neutral-900 transition-colors"
+          >
+            New content
+          </Link>
+        </div>
+        {loading ? (
+          <p className="text-muted text-sm">Loading...</p>
+        ) : (
+          <ContentList
+            content={contentWithMeta}
+            categories={categoriesWithCount}
+            allTags={allTags as { id: string; name: string }[]}
+            selectedTags={selectedTags}
+            selectedCategory={selectedCategory}
+            onTagChange={setSelectedTags}
+            onCategoryChange={setSelectedCategory}
+          />
+        )}
       </div>
-      <ContentList
-        content={contentWithMeta}
-        categories={categoriesWithCount}
-        allTags={allTags as { id: string; name: string }[]}
-        selectedTags={selectedTags}
-        selectedCategory={selectedCategory}
-        onTagChange={setSelectedTags}
-        onCategoryChange={setSelectedCategory}
-      />
-      {loading && <p className="text-muted">Loading...</p>}
     </div>
   );
 }

@@ -66,9 +66,14 @@ export default function SourcePage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        const errText = data.error ?? data.details ?? `Sync failed (${res.status})`;
+        const is503 = res.status === 503;
+        const isCreds = /credentials|service account|misconfigured/i.test(String(errText));
         setMessage({
           type: "err",
-          text: data.error ?? data.details ?? `Sync failed (${res.status})`,
+          text: is503 && isCreds
+            ? "Server setup required: add Firebase Admin credentials (FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_PATH in .env). See FIREBASE_SETUP.md §5."
+            : errText,
         });
         return;
       }
@@ -94,8 +99,8 @@ export default function SourcePage() {
   if (!user) return null;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Content source</h1>
+    <div className="max-w-2xl">
+      <h1 className="text-2xl font-bold text-foreground mb-2">Content source</h1>
       <p className="text-muted text-sm mb-6">
         Connect a GitHub repository to pull your content into the dashboard. We use all{" "}
         <strong>.md</strong> files and organize them by folder (first path segment = category).
@@ -105,23 +110,25 @@ export default function SourcePage() {
       {loading ? (
         <p className="text-muted">Loading...</p>
       ) : (
-        <div className="space-y-4 max-w-xl">
+        <div className="rounded-2xl bg-card border border-border shadow-lg shadow-black/5 p-6 space-y-4">
           <div>
-            <label className="block text-sm text-muted mb-1">GitHub repository URL</label>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              GitHub repository URL
+            </label>
             <input
               type="url"
               value={repoUrl}
               onChange={(e) => setRepoUrl(e.target.value)}
               placeholder="https://github.com/username/repo"
-              className="w-full px-3 py-2 rounded bg-card border border-border text-foreground"
+              className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <button
               type="button"
               onClick={handleSave}
               disabled={saving}
-              className="px-4 py-2 rounded bg-card border border-border text-foreground hover:bg-border disabled:opacity-50"
+              className="px-4 py-2.5 rounded-lg border border-border text-foreground bg-background hover:bg-neutral-100 disabled:opacity-50 transition-colors"
             >
               {saving ? "Saving..." : "Save URL"}
             </button>
@@ -129,7 +136,7 @@ export default function SourcePage() {
               type="button"
               onClick={handleSync}
               disabled={syncing}
-              className="px-4 py-2 rounded bg-accent text-background font-medium disabled:opacity-50"
+              className="px-4 py-2.5 rounded-lg bg-neutral-800 text-white font-medium hover:bg-neutral-900 disabled:opacity-50 transition-colors"
             >
               {syncing ? "Syncing..." : "Sync from GitHub"}
             </button>
@@ -138,8 +145,8 @@ export default function SourcePage() {
             <p
               className={
                 message.type === "ok"
-                  ? "text-sm text-green-500"
-                  : "text-sm text-red-400"
+                  ? "text-sm text-green-700"
+                  : "text-sm text-red-600"
               }
             >
               {message.text}
