@@ -51,14 +51,15 @@ export default function ContentDetailPage() {
         setContent(null);
         return;
       }
+      const contentData = c as { categoryId: string; title: string; excerpt?: string; tagIds?: string[] };
       const cat = (categories as { id: string; name: string; slug: string }[]).find(
-        (x) => x.id === (c as { categoryId: string }).categoryId
+        (x) => x.id === contentData.categoryId
       );
-      const tagNames = ((c as { tagIds?: string[] }).tagIds || []).map(
+      const tagNames = (contentData.tagIds || []).map(
         (tid) => (tags as { id: string; name: string }[]).find((t) => t.id === tid)?.name
       ).filter(Boolean) as string[];
       setContent({
-        ...(c as { title: string; excerpt?: string; categoryId: string; tagIds: string[] }),
+        ...contentData,
         category: cat ? { name: cat.name } : undefined,
         categorySlug: cat?.slug,
         tagNames,
