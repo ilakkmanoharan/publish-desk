@@ -16,10 +16,11 @@ service cloud.firestore {
       allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
-    // Content: own data only
+    // Content: owner can write; anyone can read (needed for public article pages)
     match /content/{id} {
-      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if true;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
     // Magazines: owner can write; everyone can read (for public listing)
     match /magazines/{id} {
@@ -27,10 +28,11 @@ service cloud.firestore {
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
       allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
-    // Publications: own data only
+    // Publications: owner can write; anyone can read if status is Published (for public article pages)
     match /publications/{id} {
-      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if resource.data.status == "Published" || (request.auth != null && resource.data.userId == request.auth.uid);
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
   }
 }

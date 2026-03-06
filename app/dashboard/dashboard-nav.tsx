@@ -20,7 +20,7 @@ export function DashboardNav() {
     return (
       <Link
         href={href}
-        className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+        className={`no-underline px-3 py-2 rounded-lg text-sm transition-colors ${
           isActive ? "bg-neutral-100 text-foreground font-medium" : "text-muted hover:text-foreground hover:bg-neutral-50"
         }`}
       >
@@ -30,8 +30,8 @@ export function DashboardNav() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-10 w-56 h-full bg-card border-r border-border p-4 flex flex-col gap-4">
-      <Link href="/" className="text-lg font-semibold text-accent hover:opacity-90">
+    <aside className="fixed left-0 top-0 z-10 w-56 h-full bg-card border-r border-border p-4 flex flex-col gap-4 shrink-0">
+      <Link href="/" className="no-underline text-lg font-semibold text-accent hover:opacity-90">
         Publish Desk
       </Link>
       <nav className="flex flex-col gap-1">

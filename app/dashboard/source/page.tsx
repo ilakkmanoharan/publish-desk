@@ -72,7 +72,7 @@ export default function SourcePage() {
         setMessage({
           type: "err",
           text: is503 && isCreds
-            ? "Server setup required: add Firebase Admin credentials (FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_PATH in .env). See FIREBASE_SETUP.md §5."
+            ? "Server setup required: add Firebase Admin credentials (FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_PATH in .env). See setup docs in private/."
             : errText,
         });
         return;

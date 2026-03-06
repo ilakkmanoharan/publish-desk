@@ -44,6 +44,8 @@ export type Publication = {
   contentId: string;
   magazineId: string;
   status: "Draft" | "Scheduled" | "Published";
+  /** Optional display title for this magazine; if unset, content.title is used (with first letter capitalized). */
+  displayTitle?: string | null;
   scheduledAt?: { toDate: () => Date } | null;
   publishedAt?: { toDate: () => Date } | null;
   createdAt: { toDate: () => Date };

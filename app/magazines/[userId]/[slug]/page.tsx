@@ -24,7 +24,7 @@ export default function MagazinePage() {
   const slug = params.slug as string;
   const [magazine, setMagazine] = useState<{ id: string; name: string; description?: string } | null>(null);
   const [publications, setPublications] = useState<
-    { id: string; contentId: string; content: { title: string; slug: string }; publishedAt?: unknown }[]
+    { id: string; contentId: string; displayTitle?: string | null; content: { title: string; slug: string }; publishedAt?: unknown }[]
   >([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,12 +39,14 @@ export default function MagazinePage() {
       setMagazine(m as { id: string; name: string; description?: string });
       const pubs = await getPublishedPublicationsForMagazine((m as { id: string }).id, userId);
       const withContent = await Promise.all(
-        (pubs as { id: string; contentId: string; publishedAt?: unknown }[]).map(
+        (pubs as { id: string; contentId: string; displayTitle?: string | null; publishedAt?: unknown }[]).map(
           async (p) => {
             const content = await getContentById(p.contentId);
+            const c = (content as { title: string; slug: string }) || { title: "", slug: "" };
             return {
               ...p,
-              content: (content as { title: string; slug: string }) || { title: "", slug: "" },
+              content: c,
+              displayTitle: p.displayTitle?.trim() || null,
             };
           }
         )
@@ -88,7 +90,7 @@ export default function MagazinePage() {
                 userId={userId}
                 magazineSlug={slug}
                 contentSlug={pub.content.slug}
-                title={pub.content.title}
+                title={pub.displayTitle ?? pub.content.title}
                 publishedAt={toDate(pub.publishedAt)}
               />
             ))}

@@ -80,7 +80,7 @@ export default function HomePage() {
         <div className="flex flex-wrap gap-2 mb-8">
           <input
             type="text"
-            placeholder="Filter by category slug"
+            placeholder="Filter by category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="px-3 py-2 rounded bg-card border border-border text-foreground text-sm w-48"

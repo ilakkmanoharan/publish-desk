@@ -312,6 +312,7 @@ export async function upsertPublication(
     contentId: string;
     magazineId: string;
     status: string;
+    displayTitle?: string | null;
     scheduledAt?: Date | null;
     publishedAt?: Date | null;
   }
@@ -326,6 +327,7 @@ export async function upsertPublication(
   );
   const payload = {
     ...data,
+    displayTitle: data.displayTitle?.trim() || null,
     scheduledAt: data.scheduledAt ?? null,
     publishedAt: data.publishedAt ?? null,
     updatedAt: serverTimestamp(),

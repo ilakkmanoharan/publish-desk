@@ -20,7 +20,7 @@ export default function MagazinesPage() {
     <div>
       <h1 className="text-2xl font-bold mb-6">Magazines</h1>
       <p className="text-muted text-sm mb-6">
-        Add magazines. They will appear on the public site when you publish content to them.
+        Add magazines — they’re the “containers” for your content on the public site. Content comes from your GitHub repo (Content source); magazines are what you create here and assign that content to. Each magazine gets a URL like /magazines/you/slug.
       </p>
       <MagazineForm userId={user.uid} onAdded={() => getUserMagazines(user.uid).then(setMagazines)} />
       <ul className="mt-8 space-y-3">

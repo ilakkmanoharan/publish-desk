@@ -7,7 +7,9 @@ function slugify(str: string) {
   return str
     .toLowerCase()
     .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "");
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 export function MagazineForm({
@@ -68,6 +70,7 @@ export function MagazineForm({
           className="w-full px-3 py-2 rounded bg-background border border-border text-foreground"
           placeholder="example-tech-digest"
         />
+        <p className="text-xs text-muted mt-1">Auto-filled from the name. Used in the public URL (e.g. /magazines/you/systems-mind). You can edit it if needed.</p>
       </div>
       <div>
         <label className="block text-sm text-muted mb-1">Description (optional)</label>

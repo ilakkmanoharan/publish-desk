@@ -98,6 +98,7 @@ export default function ContentDetailPage() {
       <AssignForm
         userId={user.uid}
         contentId={id}
+        contentTitle={content.title}
         contentCategorySlug={content.categorySlug ?? ""}
         contentTagNames={content.tagNames ?? []}
         magazines={magazines}

@@ -8,6 +8,7 @@ type Magazine = { id: string; name: string; slug: string };
 export function AssignForm({
   userId,
   contentId,
+  contentTitle,
   contentCategorySlug,
   contentTagNames,
   magazines,
@@ -16,6 +17,7 @@ export function AssignForm({
 }: {
   userId: string;
   contentId: string;
+  contentTitle: string;
   contentCategorySlug: string;
   contentTagNames: string[];
   magazines: Magazine[];
@@ -23,6 +25,7 @@ export function AssignForm({
   onAssigned: () => void;
 }) {
   const [magazineId, setMagazineId] = useState("");
+  const [displayTitle, setDisplayTitle] = useState("");
   const [status, setStatus] = useState<"Draft" | "Scheduled" | "Published">("Scheduled");
   const [scheduledAt, setScheduledAt] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -44,6 +47,7 @@ export function AssignForm({
         contentId,
         magazineId,
         status,
+        displayTitle: displayTitle.trim() || null,
         scheduledAt: scheduled,
         publishedAt: published,
       });
@@ -55,6 +59,7 @@ export function AssignForm({
         );
       }
       onAssigned();
+      setDisplayTitle("");
     } finally {
       setSubmitting(false);
     }
@@ -80,6 +85,17 @@ export function AssignForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-sm text-muted mb-1">Display title (optional)</label>
+        <input
+          type="text"
+          value={displayTitle}
+          onChange={(e) => setDisplayTitle(e.target.value)}
+          placeholder={contentTitle}
+          className="w-full px-3 py-2 rounded bg-background border border-border text-foreground placeholder:text-muted"
+        />
+        <p className="text-xs text-muted mt-1">Override how this article appears in the magazine. If empty, the content title is used (first letter capitalized).</p>
+      </div>
       <div>
         <label className="block text-sm text-muted mb-1">Magazine</label>
         <select

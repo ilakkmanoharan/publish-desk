@@ -22,6 +22,7 @@ export default function ArticlePage() {
   const contentSlug = params.contentSlug as string;
   const [magazine, setMagazine] = useState<{ name: string } | null>(null);
   const [content, setContent] = useState<{ title: string; body: string; excerpt?: string } | null>(null);
+  const [displayTitleOverride, setDisplayTitleOverride] = useState<string | null>(null);
   const [publishedAt, setPublishedAt] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -39,10 +40,13 @@ export default function ArticlePage() {
       );
       if (!result) {
         setContent(null);
+        setDisplayTitleOverride(null);
         setLoading(false);
         return;
       }
+      const pub = result.publication as { displayTitle?: string; publishedAt?: unknown };
       setContent(result.content as { title: string; body: string; excerpt?: string });
+      setDisplayTitleOverride(pub.displayTitle?.trim() || null);
       setPublishedAt(toDate(result.publication.publishedAt));
       setLoading(false);
     });
@@ -51,7 +55,8 @@ export default function ArticlePage() {
   if (loading) return <div className="min-h-screen bg-background p-8">Loading...</div>;
   if (!magazine || !content) return <div className="min-h-screen bg-background p-8">Article not found.</div>;
 
-  const displayTitle = slugToTitle(content.title);
+  const titleSource = displayTitleOverride || content.title;
+  const displayTitle = slugToTitle(titleSource);
 
   return (
     <div className="min-h-screen bg-background">
