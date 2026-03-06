@@ -1,20 +1,27 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { upsertPublication, addMagazineSlugsForPublish } from "@/lib/firestore/collections";
 
 type Magazine = { id: string; name: string; slug: string };
 
 export function AssignForm({
+  userId,
   contentId,
+  contentCategorySlug,
+  contentTagNames,
   magazines,
   existingPublications,
+  onAssigned,
 }: {
+  userId: string;
   contentId: string;
+  contentCategorySlug: string;
+  contentTagNames: string[];
   magazines: Magazine[];
   existingPublications: { magazineId: string }[];
+  onAssigned: () => void;
 }) {
-  const router = useRouter();
   const [magazineId, setMagazineId] = useState("");
   const [status, setStatus] = useState<"Draft" | "Scheduled" | "Published">("Scheduled");
   const [scheduledAt, setScheduledAt] = useState("");
@@ -29,21 +36,25 @@ export function AssignForm({
     if (!magazineId) return;
     setSubmitting(true);
     try {
-      const res = await fetch("/api/publications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contentId,
-          magazineId,
-          status,
-          scheduledAt: status === "Scheduled" ? (scheduledAt || null) : null,
-          publishedAt:
-            status === "Published"
-              ? new Date().toISOString()
-              : null,
-        }),
+      const scheduled =
+        status === "Scheduled" && scheduledAt ? new Date(scheduledAt) : null;
+      const published =
+        status === "Published" ? new Date() : null;
+      await upsertPublication(userId, {
+        contentId,
+        magazineId,
+        status,
+        scheduledAt: scheduled,
+        publishedAt: published,
       });
-      if (res.ok) router.refresh();
+      if (status === "Published" && contentCategorySlug) {
+        await addMagazineSlugsForPublish(
+          magazineId,
+          contentCategorySlug,
+          contentTagNames
+        );
+      }
+      onAssigned();
     } finally {
       setSubmitting(false);
     }

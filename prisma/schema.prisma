@@ -1,12 +1,12 @@
 // Publish Desk — Database schema
-// SQLite for simplicity; can switch to PostgreSQL later
+// PostgreSQL for Vercel/serverless (e.g. Neon). Use Neon free tier for local + production.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

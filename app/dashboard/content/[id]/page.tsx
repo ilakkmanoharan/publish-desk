@@ -1,57 +1,135 @@
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
+import {
+  getUserContentById,
+  getUserMagazines,
+  getPublicationsForContent,
+  getMagazineById,
+  getUserCategories,
+  getUserTags,
+} from "@/lib/firestore/collections";
 import { slugToTitle } from "@/lib/format-title";
 import { AssignForm } from "./assign-form";
 
-export default async function ContentDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const content = await prisma.content.findUnique({
-    where: { id },
-    include: {
-      category: true,
-      tags: { include: { tag: true } },
-      publications: { include: { magazine: true } },
-    },
-  });
+function toDate(v: unknown): Date | null {
+  if (!v) return null;
+  if (typeof (v as { toDate?: () => Date }).toDate === "function")
+    return (v as { toDate: () => Date }).toDate();
+  if (v instanceof Date) return v;
+  return null;
+}
 
-  if (!content) notFound();
+export default function ContentDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
+  const { user } = useAuth();
+  const [content, setContent] = useState<{
+    title: string;
+    excerpt?: string;
+    categoryId: string;
+    tagIds: string[];
+    category?: { name: string };
+    categorySlug?: string;
+    tagNames?: string[];
+  } | null>(null);
+  const [magazines, setMagazines] = useState<{ id: string; name: string; slug: string }[]>([]);
+  const [publications, setPublications] = useState<
+    { magazineId: string; magazineName: string; status: string; scheduledAt?: unknown; publishedAt?: unknown }[]
+  >([]);
 
-  const magazines = await prisma.magazine.findMany({
-    orderBy: { name: "asc" },
-  });
+  useEffect(() => {
+    if (!user?.uid) return;
+    Promise.all([
+      getUserContentById(user.uid, id),
+      getUserCategories(user.uid),
+      getUserTags(user.uid),
+    ]).then(([c, categories, tags]) => {
+      if (!c) {
+        setContent(null);
+        return;
+      }
+      const cat = (categories as { id: string; name: string; slug: string }[]).find(
+        (x) => x.id === (c as { categoryId: string }).categoryId
+      );
+      const tagNames = ((c as { tagIds?: string[] }).tagIds || []).map(
+        (tid) => (tags as { id: string; name: string }[]).find((t) => t.id === tid)?.name
+      ).filter(Boolean) as string[];
+      setContent({
+        ...(c as { title: string; excerpt?: string; categoryId: string; tagIds: string[] }),
+        category: cat ? { name: cat.name } : undefined,
+        categorySlug: cat?.slug,
+        tagNames,
+      });
+    });
+    getUserMagazines(user.uid).then(setMagazines);
+    getPublicationsForContent(user.uid, id).then(async (pubs) => {
+      const withMag = await Promise.all(
+        (pubs as { magazineId: string; status: string; scheduledAt?: unknown; publishedAt?: unknown }[]).map(
+          async (p) => {
+            const mag = await getMagazineById(p.magazineId);
+            return {
+              ...p,
+              magazineName: (mag as { name: string })?.name ?? "",
+            };
+          }
+        )
+      );
+      setPublications(withMag);
+    });
+  }, [user?.uid, id]);
+
+  if (!user) return null;
+  if (!content) return <div className="p-8">Content not found.</div>;
 
   return (
     <div className="max-w-2xl">
       <h1 className="text-2xl font-bold mb-2">{slugToTitle(content.title)}</h1>
       <p className="text-muted text-sm mb-4">
-        {content.category.name}
-        {content.tags.length > 0 && (
-          <> · {content.tags.map((t) => t.tag.name).join(", ")}</>
-        )}
+        {content.category?.name}
+        {content.tagNames?.length ? ` · ${content.tagNames.join(", ")}` : ""}
       </p>
       {content.excerpt && (
         <p className="text-muted mb-6">{content.excerpt}</p>
       )}
       <h2 className="text-lg font-semibold mb-2">Assign to magazine</h2>
       <AssignForm
-        contentId={content.id}
+        userId={user.uid}
+        contentId={id}
+        contentCategorySlug={content.categorySlug ?? ""}
+        contentTagNames={content.tagNames ?? []}
         magazines={magazines}
-        existingPublications={content.publications}
+        existingPublications={publications.map((p) => ({ magazineId: p.magazineId }))}
+        onAssigned={() => {
+          getPublicationsForContent(user.uid, id).then(async (pubs) => {
+            const withMag = await Promise.all(
+              (pubs as { magazineId: string; status: string; scheduledAt?: unknown; publishedAt?: unknown }[]).map(
+                async (p) => {
+                  const mag = await getMagazineById(p.magazineId);
+                  return {
+                    ...p,
+                    magazineName: (mag as { name: string })?.name ?? "",
+                  };
+                }
+              )
+            );
+            setPublications(withMag);
+          });
+        }}
       />
-      {content.publications.length > 0 && (
+      {publications.length > 0 && (
         <>
           <h2 className="text-lg font-semibold mt-8 mb-2">Current assignments</h2>
           <ul className="space-y-2 text-sm">
-            {content.publications.map((pub) => (
-              <li key={pub.id} className="flex justify-between items-center">
-                <span>{pub.magazine.name}</span>
+            {publications.map((p) => (
+              <li key={p.magazineId} className="flex justify-between items-center">
+                <span>{p.magazineName}</span>
                 <span className="text-muted">
-                  {pub.status}
-                  {pub.scheduledAt && ` · ${new Date(pub.publishedAt ?? pub.scheduledAt).toLocaleDateString()}`}
+                  {p.status}
+                  {(p.scheduledAt || p.publishedAt) &&
+                    ` · ${toDate(p.publishedAt ?? p.scheduledAt)?.toLocaleDateString() ?? ""}`}
                 </span>
               </li>
             ))}

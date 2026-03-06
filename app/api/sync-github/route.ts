@@ -1,0 +1,242 @@
+import { NextResponse } from "next/server";
+import matter from "gray-matter";
+import { getAdminApp, getAdminAuth, getAdminFirestore } from "@/lib/firebase-admin";
+
+const GITHUB_API = "https://api.github.com";
+
+type GitHubTreeItem = { path: string; type: string; sha: string };
+
+function parseRepoUrl(url: string): { owner: string; repo: string } | null {
+  const trimmed = url.trim().replace(/\.git$/, "");
+  const match = trimmed.match(/github\.com[/:](\w[\w.-]*)\/([\w.-]+)/);
+  if (!match) return null;
+  return { owner: match[1], repo: match[2] };
+}
+
+function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
+}
+
+export async function POST(request: Request) {
+  try {
+    getAdminApp();
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+    if (msg.includes("FIREBASE_SERVICE_ACCOUNT_JSON")) {
+      return NextResponse.json(
+        { error: "Server misconfigured: Firebase Admin credentials not set." },
+        { status: 503 }
+      );
+    }
+    throw e;
+  }
+
+  try {
+    const authHeader = request.headers.get("authorization");
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (!token) {
+      return NextResponse.json({ error: "Missing or invalid Authorization header" }, { status: 401 });
+    }
+
+    let uid: string;
+    try {
+      const app = getAdminApp();
+      const auth = getAdminAuth();
+      const decoded = await auth.verifyIdToken(token);
+      uid = decoded.uid;
+    } catch {
+      return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
+    }
+
+    const body = await request.json().catch(() => ({}));
+    const repoUrl = (body.repoUrl as string)?.trim();
+    if (!repoUrl) {
+      return NextResponse.json({ error: "repoUrl is required" }, { status: 400 });
+    }
+
+    const parsed = parseRepoUrl(repoUrl);
+    if (!parsed) {
+      return NextResponse.json({ error: "Invalid GitHub repo URL" }, { status: 400 });
+    }
+    const { owner, repo } = parsed;
+
+    // Get default branch and tree SHA
+    const repoRes = await fetch(`${GITHUB_API}/repos/${owner}/${repo}`, {
+      headers: { Accept: "application/vnd.github.v3+json" },
+    });
+    if (!repoRes.ok) {
+      const err = await repoRes.text();
+      return NextResponse.json(
+        { error: "Failed to fetch repo. Is it public?", details: err },
+        { status: 400 }
+      );
+    }
+    const repoData = await repoRes.json();
+    const defaultBranch = repoData.default_branch ?? "main";
+
+    const branchRes = await fetch(
+      `${GITHUB_API}/repos/${owner}/${repo}/branches/${defaultBranch}`,
+      { headers: { Accept: "application/vnd.github.v3+json" } }
+    );
+    if (!branchRes.ok) {
+      return NextResponse.json({ error: "Failed to fetch branch" }, { status: 400 });
+    }
+    const branchData = await branchRes.json();
+    const commitSha = branchData.commit?.sha;
+    if (!commitSha) {
+      return NextResponse.json({ error: "Could not get commit SHA" }, { status: 400 });
+    }
+
+    const commitRes = await fetch(
+      `${GITHUB_API}/repos/${owner}/${repo}/git/commits/${commitSha}`,
+      { headers: { Accept: "application/vnd.github.v3+json" } }
+    );
+    if (!commitRes.ok) {
+      return NextResponse.json({ error: "Failed to fetch commit" }, { status: 400 });
+    }
+    const commitJson = await commitRes.json();
+    const treeSha = commitJson.tree?.sha;
+    if (!treeSha) {
+      return NextResponse.json({ error: "Could not get tree SHA" }, { status: 400 });
+    }
+
+    const treeRes = await fetch(
+      `${GITHUB_API}/repos/${owner}/${repo}/git/trees/${treeSha}?recursive=1`,
+      { headers: { Accept: "application/vnd.github.v3+json" } }
+    );
+    if (!treeRes.ok) {
+      return NextResponse.json({ error: "Failed to fetch tree" }, { status: 400 });
+    }
+    const treeJson = await treeRes.json();
+    const mdPaths = (treeJson.tree as GitHubTreeItem[]).filter(
+      (item) => item.type === "blob" && item.path.toLowerCase().endsWith(".md")
+    );
+
+    const db = getAdminFirestore();
+    const categoriesCol = db.collection("categories");
+    const tagsCol = db.collection("tags");
+    const contentCol = db.collection("content");
+
+    const categoryIdsBySlug: Record<string, string> = {};
+    const tagIdsByName: Record<string, string> = {};
+    let categoriesCreated = 0;
+    let contentUpserted = 0;
+
+    for (const item of mdPaths) {
+      const path = item.path;
+      const parts = path.split("/");
+      const categorySlug = parts.length > 1 ? slugify(parts[0]) : "uncategorized";
+      const fileName = parts[parts.length - 1];
+      const fileBase = fileName.replace(/\.md$/i, "");
+
+      const contentRes = await fetch(
+        `${GITHUB_API}/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}?ref=${defaultBranch}`,
+        { headers: { Accept: "application/vnd.github.v3+json" } }
+      );
+      if (!contentRes.ok) continue;
+      const fileData = await contentRes.json();
+      let raw = fileData.content;
+      if (typeof raw === "string" && fileData.encoding === "base64") {
+        raw = Buffer.from(raw, "base64").toString("utf-8");
+      } else {
+        continue;
+      }
+
+      const { data: frontMatter, content: body } = matter(raw);
+      const title = frontMatter.title ?? fileBase.replace(/-/g, " ");
+      const slug = frontMatter.slug ?? slugify(fileBase);
+      const excerpt = frontMatter.excerpt ?? null;
+      const tagNames = Array.isArray(frontMatter.tags)
+        ? frontMatter.tags.map((t: string) => String(t).trim().toLowerCase())
+        : [];
+
+      if (!categoryIdsBySlug[categorySlug]) {
+        const existing = await categoriesCol
+          .where("userId", "==", uid)
+          .where("slug", "==", categorySlug)
+          .limit(1)
+          .get();
+        if (!existing.empty) {
+          categoryIdsBySlug[categorySlug] = existing.docs[0].id;
+        } else {
+          const categoryName = parts[0] ?? "Uncategorized";
+          const ref = await categoriesCol.add({
+            userId: uid,
+            name: categoryName,
+            slug: categorySlug,
+          });
+          categoryIdsBySlug[categorySlug] = ref.id;
+          categoriesCreated++;
+        }
+      }
+      const categoryId = categoryIdsBySlug[categorySlug];
+
+      const tagIds: string[] = [];
+      for (const name of tagNames) {
+        if (!name) continue;
+        if (!tagIdsByName[name]) {
+          const existing = await tagsCol
+            .where("userId", "==", uid)
+            .where("name", "==", name)
+            .limit(1)
+            .get();
+          if (!existing.empty) {
+            tagIdsByName[name] = existing.docs[0].id;
+          } else {
+            const ref = await tagsCol.add({ userId: uid, name });
+            tagIdsByName[name] = ref.id;
+          }
+        }
+        tagIds.push(tagIdsByName[name]);
+      }
+
+      const existingContent = await contentCol
+        .where("userId", "==", uid)
+        .where("slug", "==", slug)
+        .limit(1)
+        .get();
+
+      const contentData = {
+        userId: uid,
+        title,
+        slug,
+        body: body.trim(),
+        excerpt: excerpt || null,
+        categoryId,
+        tagIds,
+        updatedAt: new Date(),
+      };
+
+      if (!existingContent.empty) {
+        await existingContent.docs[0].ref.update(contentData);
+      } else {
+        await contentCol.add({
+          ...contentData,
+          createdAt: new Date(),
+        });
+      }
+      contentUpserted++;
+    }
+
+    await db.collection("users").doc(uid).set(
+      { githubRepoUrl: repoUrl, githubRepoLastSyncAt: new Date() },
+      { merge: true }
+    );
+
+    return NextResponse.json({
+      ok: true,
+      categoriesCreated,
+      contentUpserted,
+      filesScanned: mdPaths.length,
+    });
+  } catch (e) {
+    console.error("sync-github error", e);
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Sync failed" },
+      { status: 500 }
+    );
+  }
+}

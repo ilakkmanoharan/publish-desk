@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { createMagazine } from "@/lib/firestore/collections";
 
 function slugify(str: string) {
   return str
@@ -10,8 +10,13 @@ function slugify(str: string) {
     .replace(/[^a-z0-9-]/g, "");
 }
 
-export function MagazineForm() {
-  const router = useRouter();
+export function MagazineForm({
+  userId,
+  onAdded,
+}: {
+  userId: string;
+  onAdded: () => void;
+}) {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
@@ -27,21 +32,15 @@ export function MagazineForm() {
     if (!name.trim()) return;
     setSubmitting(true);
     try {
-      const res = await fetch("/api/magazines", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(),
-          slug: (slug || slugify(name)).trim(),
-          description: description.trim() || null,
-        }),
+      await createMagazine(userId, {
+        name: name.trim(),
+        slug: (slug || slugify(name)).trim(),
+        description: description.trim() || undefined,
       });
-      if (res.ok) {
-        setName("");
-        setSlug("");
-        setDescription("");
-        router.refresh();
-      }
+      setName("");
+      setSlug("");
+      setDescription("");
+      onAdded();
     } finally {
       setSubmitting(false);
     }

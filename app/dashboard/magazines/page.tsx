@@ -1,20 +1,28 @@
-import { prisma } from "@/lib/db";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/auth-context";
+import { getUserMagazines } from "@/lib/firestore/collections";
 import { MagazineForm } from "./magazine-form";
 
-export default async function MagazinesPage() {
-  const magazines = await prisma.magazine.findMany({
-    orderBy: { name: "asc" },
-    include: { _count: { select: { publications: true } } },
-  });
+export default function MagazinesPage() {
+  const { user } = useAuth();
+  const [magazines, setMagazines] = useState<{ id: string; name: string; slug: string; description?: string }[]>([]);
+
+  useEffect(() => {
+    if (!user?.uid) return;
+    getUserMagazines(user.uid).then(setMagazines);
+  }, [user?.uid]);
+
+  if (!user) return null;
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Magazines</h1>
       <p className="text-muted text-sm mb-6">
-        Add and edit magazine names and details here. You can also maintain them in{" "}
-        <code className="bg-card px-1 rounded">private/magazines.md</code> and sync later.
+        Add magazines. They will appear on the public site when you publish content to them.
       </p>
-      <MagazineForm />
+      <MagazineForm userId={user.uid} onAdded={() => getUserMagazines(user.uid).then(setMagazines)} />
       <ul className="mt-8 space-y-3">
         {magazines.map((m) => (
           <li
@@ -28,7 +36,6 @@ export default async function MagazinesPage() {
                 <p className="text-muted text-sm mt-1">{m.description}</p>
               )}
             </div>
-            <span className="text-muted text-sm">{m._count.publications} articles</span>
           </li>
         ))}
       </ul>

@@ -1,19 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { slugToTitle } from "@/lib/format-title";
 
 type ContentItem = {
   id: string;
   title: string;
   slug: string;
-  excerpt: string | null;
+  excerpt?: string | null;
   category: { name: string; slug: string };
   tags: { tag: { name: string } }[];
 };
-type Category = { name: string; slug: string; _count: { content: number } };
-type Tag = { name: string };
+type Category = { id: string; name: string; slug: string; _count?: { content: number } };
+type Tag = { id: string; name: string };
 
 export function ContentList({
   content,
@@ -21,30 +20,27 @@ export function ContentList({
   allTags,
   selectedTags,
   selectedCategory,
+  onTagChange,
+  onCategoryChange,
 }: {
   content: ContentItem[];
   categories: Category[];
   allTags: Tag[];
   selectedTags: string[];
   selectedCategory: string | null;
+  onTagChange?: (tags: string[]) => void;
+  onCategoryChange?: (slug: string | null) => void;
 }) {
-  const router = useRouter();
-
   function toggleTag(name: string) {
+    if (!onTagChange) return;
     const next = selectedTags.includes(name)
       ? selectedTags.filter((t) => t !== name)
       : [...selectedTags, name];
-    const q = new URLSearchParams();
-    if (next.length) q.set("tags", next.join(","));
-    if (selectedCategory) q.set("category", selectedCategory);
-    router.push("/dashboard?" + q.toString());
+    onTagChange(next);
   }
 
   function setCategory(slug: string | null) {
-    const q = new URLSearchParams();
-    if (selectedTags.length) q.set("tags", selectedTags.join(","));
-    if (slug) q.set("category", slug);
-    router.push("/dashboard?" + q.toString());
+    onCategoryChange?.(slug);
   }
 
   return (
@@ -61,13 +57,13 @@ export function ContentList({
         </button>
         {categories.map((c) => (
           <button
-            key={c.slug}
+            key={c.id}
             onClick={() => setCategory(c.slug)}
             className={`px-3 py-1 rounded text-sm ${
               selectedCategory === c.slug ? "bg-accent text-background" : "bg-card text-muted hover:text-foreground"
             }`}
           >
-            {c.name} ({c._count.content})
+            {c.name}{c._count != null ? ` (${c._count.content})` : ""}
           </button>
         ))}
       </div>
@@ -124,7 +120,7 @@ export function ContentList({
         ))}
       </ul>
       {content.length === 0 && (
-        <p className="text-muted">No content found. Run the import script to add content from private/content-ready.</p>
+        <p className="text-muted">No content found. Add content from your library or run the import script.</p>
       )}
     </div>
   );
