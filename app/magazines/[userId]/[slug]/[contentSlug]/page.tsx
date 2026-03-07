@@ -32,10 +32,10 @@ export default function ArticlePage() {
         setLoading(false);
         return;
       }
-      setMagazine(m as { name: string });
+      setMagazine(m);
       const result = await getPublicationByContentSlug(
         userId,
-        (m as { id: string }).id,
+        m.id,
         contentSlug
       );
       if (!result) {
@@ -44,9 +44,8 @@ export default function ArticlePage() {
         setLoading(false);
         return;
       }
-      const pub = result.publication as { displayTitle?: string; publishedAt?: unknown };
-      setContent(result.content as { title: string; body: string; excerpt?: string });
-      setDisplayTitleOverride(pub.displayTitle?.trim() || null);
+      setContent(result.content);
+      setDisplayTitleOverride(result.publication.displayTitle?.trim() || null);
       setPublishedAt(toDate(result.publication.publishedAt));
       setLoading(false);
     });

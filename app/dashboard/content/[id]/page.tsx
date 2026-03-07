@@ -51,15 +51,17 @@ export default function ContentDetailPage() {
         setContent(null);
         return;
       }
-      const contentData = c as unknown as { categoryId: string; title: string; excerpt?: string; tagIds?: string[] };
       const cat = (categories as { id: string; name: string; slug: string }[]).find(
-        (x) => x.id === contentData.categoryId
+        (x) => x.id === c.categoryId
       );
-      const tagNames = (contentData.tagIds || []).map(
+      const tagNames = (c.tagIds || []).map(
         (tid) => (tags as { id: string; name: string }[]).find((t) => t.id === tid)?.name
       ).filter(Boolean) as string[];
       setContent({
-        ...contentData,
+        categoryId: c.categoryId,
+        title: c.title,
+        excerpt: c.excerpt,
+        tagIds: c.tagIds,
         category: cat ? { name: cat.name } : undefined,
         categorySlug: cat?.slug,
         tagNames,
@@ -68,15 +70,13 @@ export default function ContentDetailPage() {
     getUserMagazines(user.uid).then(setMagazines);
     getPublicationsForContent(user.uid, id).then(async (pubs) => {
       const withMag = await Promise.all(
-        (pubs as { magazineId: string; status: string; scheduledAt?: unknown; publishedAt?: unknown }[]).map(
-          async (p) => {
+        pubs.map(async (p) => {
             const mag = await getMagazineById(p.magazineId);
             return {
               ...p,
-              magazineName: (mag as { name: string })?.name ?? "",
+              magazineName: mag?.name ?? "",
             };
-          }
-        )
+          })
       );
       setPublications(withMag);
     });
@@ -130,8 +130,9 @@ export default function ContentDetailPage() {
                 <span>{p.magazineName}</span>
                 <span className="text-muted">
                   {p.status}
-                  {(p.scheduledAt || p.publishedAt) &&
-                    ` · ${toDate(p.publishedAt ?? p.scheduledAt)?.toLocaleDateString() ?? ""}`}
+                  {(p.scheduledAt || p.publishedAt)
+                    ? ` · ${toDate(p.publishedAt ?? p.scheduledAt)?.toLocaleDateString() ?? ""}`
+                    : ""}
                 </span>
               </li>
             ))}

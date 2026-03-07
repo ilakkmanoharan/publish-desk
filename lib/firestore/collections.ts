@@ -54,7 +54,10 @@ export async function getAllMagazines(categorySlug?: string, tagName?: string) {
           orderBy("updatedAt", "desc")
         );
   const snap = await getDocs(q);
-  const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const list = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as Array<{
+    id: string;
+    updatedAt?: { toMillis?: () => number };
+  }>;
   if (constraints.length > 0) {
     list.sort(
       (a, b) =>
@@ -64,7 +67,10 @@ export async function getAllMagazines(categorySlug?: string, tagName?: string) {
   return list;
 }
 
-export async function getMagazineByUserIdAndSlug(userId: string, slug: string) {
+export async function getMagazineByUserIdAndSlug(
+  userId: string,
+  slug: string
+): Promise<{ id: string; name: string } | null> {
   const q = query(
     collection(db(), COLLECTIONS.magazines),
     where("userId", "==", userId),
@@ -72,7 +78,8 @@ export async function getMagazineByUserIdAndSlug(userId: string, slug: string) {
   );
   const snap = await getDocs(q);
   if (snap.empty) return null;
-  return { id: snap.docs[0].id, ...snap.docs[0].data() };
+  const data = snap.docs[0].data();
+  return { id: snap.docs[0].id, name: (data?.name as string) ?? "" };
 }
 
 export async function getPublishedPublicationsForMagazine(
@@ -113,35 +120,74 @@ export async function getPublicationByContentSlug(
   );
   if (pubSnap.empty) return null;
   const pub = pubSnap.docs[0];
-  const content = contentSnap.docs[0].data();
+  const pubData = pub.data();
+  const contentData = contentSnap.docs[0].data();
   return {
-    publication: { id: pub.id, ...pub.data() },
-    content: { id: contentSnap.docs[0].id, ...content },
+    publication: {
+      id: pub.id,
+      displayTitle: pubData?.displayTitle as string | undefined,
+      publishedAt: pubData?.publishedAt,
+    },
+    content: {
+      id: contentSnap.docs[0].id,
+      title: (contentData?.title as string) ?? "",
+      body: (contentData?.body as string) ?? "",
+      excerpt: contentData?.excerpt as string | undefined,
+    },
   };
 }
 
-export async function getContentById(contentId: string) {
+export async function getContentById(
+  contentId: string
+): Promise<{ id: string; title: string; slug: string } | null> {
   const ref = doc(db(), COLLECTIONS.content, contentId);
   const snap = await getDoc(ref);
   if (!snap.exists()) return null;
-  return { id: snap.id, ...snap.data() };
+  const data = snap.data();
+  return {
+    id: snap.id,
+    title: (data?.title as string) ?? "",
+    slug: (data?.slug as string) ?? "",
+  };
 }
 
-export async function getMagazineById(magazineId: string) {
+export async function getMagazineById(
+  magazineId: string
+): Promise<{ id: string; name: string; slug: string; userId?: string; categorySlugs?: string[]; tagNames?: string[] } | null> {
   const ref = doc(db(), COLLECTIONS.magazines, magazineId);
   const snap = await getDoc(ref);
   if (!snap.exists()) return null;
-  return { id: snap.id, ...snap.data() };
+  const data = snap.data();
+  return {
+    id: snap.id,
+    name: (data?.name as string) ?? "",
+    slug: (data?.slug as string) ?? "",
+    userId: data?.userId as string | undefined,
+    categorySlugs: data?.categorySlugs as string[] | undefined,
+    tagNames: data?.tagNames as string[] | undefined,
+  };
 }
 
-export async function getPublicationsForContent(userId: string, contentId: string) {
+export async function getPublicationsForContent(
+  userId: string,
+  contentId: string
+): Promise<{ id: string; magazineId: string; status: string; scheduledAt?: unknown; publishedAt?: unknown }[]> {
   const q = query(
     collection(db(), COLLECTIONS.publications),
     where("userId", "==", userId),
     where("contentId", "==", contentId)
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      magazineId: (data?.magazineId as string) ?? "",
+      status: (data?.status as string) ?? "",
+      scheduledAt: data?.scheduledAt,
+      publishedAt: data?.publishedAt,
+    };
+  });
 }
 
 // ——— Per-user (dashboard) ———
@@ -151,7 +197,7 @@ export async function getUserCategories(userId: string) {
     where("userId", "==", userId)
   );
   const snap = await getDocs(q);
-  const list = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as { id: string; name: string }[];
+  const list = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as { id: string; name: string; slug: string }[];
   list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
   return list;
 }
@@ -204,16 +250,26 @@ export async function getUserMagazines(userId: string) {
     where("userId", "==", userId)
   );
   const snap = await getDocs(q);
-  const list = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as { id: string; name: string }[];
+  const list = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as { id: string; name: string; slug: string }[];
   list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
   return list;
 }
 
-export async function getUserContentById(userId: string, contentId: string) {
+export async function getUserContentById(
+  userId: string,
+  contentId: string
+): Promise<{ id: string; categoryId: string; title: string; excerpt?: string; tagIds: string[] } | null> {
   const ref = doc(db(), COLLECTIONS.content, contentId);
   const snap = await getDoc(ref);
   if (!snap.exists() || snap.data()?.userId !== userId) return null;
-  return { id: snap.id, ...snap.data() };
+  const data = snap.data();
+  return {
+    id: snap.id,
+    categoryId: data?.categoryId ?? "",
+    title: data?.title ?? "",
+    excerpt: data?.excerpt,
+    tagIds: (data?.tagIds as string[]) ?? [],
+  };
 }
 
 export async function getUserPublications(userId: string, status?: "Scheduled" | "Published") {
@@ -223,7 +279,10 @@ export async function getUserPublications(userId: string, status?: "Scheduled" |
   );
   if (status) q = query(q, where("status", "==", status));
   const snap = await getDocs(q);
-  const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const list = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as Array<{
+    id: string;
+    scheduledAt?: { toMillis?: () => number };
+  }>;
   list.sort((a, b) => (a.scheduledAt?.toMillis?.() ?? 0) - (b.scheduledAt?.toMillis?.() ?? 0));
   return list;
 }

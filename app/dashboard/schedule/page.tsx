@@ -38,7 +38,7 @@ export default function SchedulePage() {
     if (!user?.uid) return;
     getUserPublications(user.uid, "Scheduled").then(async (pubs) => {
       const withMeta = await Promise.all(
-        (pubs as { id: string; contentId: string; magazineId: string; scheduledAt?: unknown }[]).map(
+        (pubs as { id: string; contentId: string; magazineId: string; status: string; scheduledAt?: unknown }[]).map(
           async (p) => {
             const [content, magazine] = await Promise.all([
               getContentById(p.contentId),
@@ -46,8 +46,8 @@ export default function SchedulePage() {
             ]);
             return {
               ...p,
-              content: content as { title: string; slug: string },
-              magazine: magazine as { name: string; slug: string; userId: string },
+              content: content ? { title: content.title, slug: content.slug } : undefined,
+              magazine: magazine ? { name: magazine.name, slug: magazine.slug, userId: magazine.userId ?? "" } : undefined,
             };
           }
         )
@@ -56,7 +56,7 @@ export default function SchedulePage() {
     });
     getUserPublications(user.uid, "Published").then(async (pubs) => {
       const withMeta = await Promise.all(
-        (pubs as { id: string; contentId: string; magazineId: string; publishedAt?: unknown }[]).map(
+        (pubs as { id: string; contentId: string; magazineId: string; status: string; publishedAt?: unknown }[]).map(
           async (p) => {
             const [content, magazine] = await Promise.all([
               getContentById(p.contentId),
@@ -64,8 +64,8 @@ export default function SchedulePage() {
             ]);
             return {
               ...p,
-              content: content as { title: string; slug: string },
-              magazine: magazine as { name: string; slug: string; userId: string },
+              content: content ? { title: content.title, slug: content.slug } : undefined,
+              magazine: magazine ? { name: magazine.name, slug: magazine.slug, userId: magazine.userId ?? "" } : undefined,
             };
           }
         )
