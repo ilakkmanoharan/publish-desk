@@ -49,9 +49,9 @@ export function ContentList({
         <span className="text-muted text-sm font-medium">Category:</span>
         <button
           onClick={() => setCategory(null)}
-          className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+          className={`px-3 py-1.5 rounded-xl text-sm transition-colors ${
             !selectedCategory
-              ? "bg-neutral-800 text-white"
+              ? "bg-accent text-white"
               : "bg-background border border-border text-muted hover:text-foreground hover:bg-neutral-50"
           }`}
         >
@@ -61,9 +61,9 @@ export function ContentList({
           <button
             key={c.id}
             onClick={() => setCategory(c.slug)}
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+            className={`px-3 py-1.5 rounded-xl text-sm transition-colors ${
               selectedCategory === c.slug
-                ? "bg-neutral-800 text-white"
+                ? "bg-accent text-white"
                 : "bg-background border border-border text-muted hover:text-foreground hover:bg-neutral-50"
             }`}
           >
@@ -77,9 +77,9 @@ export function ContentList({
           <button
             key={t.name}
             onClick={() => toggleTag(t.name)}
-            className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
+            className={`px-3 py-1.5 rounded-xl text-sm border transition-colors ${
               selectedTags.includes(t.name)
-                ? "border-neutral-800 bg-neutral-100 text-foreground"
+                ? "border-accent bg-accent/10 text-foreground"
                 : "border-border text-muted hover:text-foreground hover:bg-neutral-50"
             }`}
           >
@@ -91,22 +91,22 @@ export function ContentList({
         {content.map((item) => (
           <li
             key={item.id}
-            className="flex items-center justify-between p-4 rounded-lg bg-background border border-border hover:border-neutral-300 transition-colors"
+            className="flex items-center justify-between p-4 rounded-xl bg-background border border-border hover:border-accent/30 hover:shadow-sm transition-all duration-200"
           >
             <div>
               <Link
                 href={`/dashboard/content/${item.id}`}
-                className="font-medium text-accent hover:underline"
+                className="font-medium text-accent hover:underline no-underline"
               >
                 {slugToTitle(item.title)}
               </Link>
               <p className="text-muted text-sm mt-1">{item.category.name}</p>
               {item.tags.length > 0 && (
-                <div className="flex gap-2 mt-2">
+                <div className="flex gap-2 mt-2 flex-wrap">
                   {item.tags.map(({ tag }) => (
                     <span
                       key={tag.name}
-                      className="text-xs px-2 py-0.5 rounded-md bg-neutral-100 text-muted"
+                      className="text-xs px-2 py-1 rounded-lg bg-accent/10 text-accent font-medium"
                     >
                       {tag.name}
                     </span>
@@ -116,7 +116,7 @@ export function ContentList({
             </div>
             <Link
               href={`/dashboard/content/${item.id}`}
-              className="text-sm text-muted hover:text-accent transition-colors"
+              className="text-sm text-muted hover:text-accent transition-colors no-underline"
             >
               Assign to magazine →
             </Link>
@@ -124,14 +124,14 @@ export function ContentList({
         ))}
       </ul>
       {content.length === 0 && (
-        <div className="rounded-xl bg-neutral-50 border border-border p-6 text-center">
-          <p className="text-muted mb-3">No content yet.</p>
-          <p className="text-sm text-foreground mb-4">
+        <div className="rounded-2xl bg-neutral-50/80 border border-border p-8 text-center">
+          <p className="text-muted mb-2">No content yet.</p>
+          <p className="text-sm text-foreground mb-5">
             Connect a GitHub repo in <Link href="/dashboard/source" className="text-accent font-medium hover:underline">Content source</Link> to sync .md files, or add content manually.
           </p>
           <Link
             href="/dashboard/source"
-            className="inline-block px-4 py-2 rounded-lg bg-neutral-800 text-white text-sm font-medium hover:bg-neutral-900 transition-colors"
+            className="inline-block px-5 py-2.5 rounded-xl bg-accent text-white text-sm font-medium hover:opacity-90 transition-opacity no-underline"
           >
             Go to Content source
           </Link>

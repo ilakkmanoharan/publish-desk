@@ -64,26 +64,26 @@ export default function MagazinePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border px-6 py-4">
-        <div className="mx-auto max-w-4xl flex justify-between items-center">
-          <Link href="/" className="text-xl font-semibold text-accent">
+      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="mx-auto max-w-4xl flex justify-between items-center px-6 py-4">
+          <Link href="/" className="text-xl font-semibold text-accent no-underline hover:opacity-90 transition-opacity">
             Publish Desk
           </Link>
-          <Link href="/" className="text-sm text-muted hover:text-foreground">
+          <Link href="/" className="text-sm text-muted hover:text-foreground no-underline transition-colors">
             ← All magazines
           </Link>
         </div>
       </header>
-      <main className="mx-auto max-w-4xl px-6 py-12">
-        <h1 className="text-3xl font-bold mb-2">{magazine.name}</h1>
+      <main className="mx-auto max-w-4xl px-6 py-14">
+        <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">{magazine.name}</h1>
         {magazine.description && (
-          <p className="text-muted mb-8">{magazine.description}</p>
+          <p className="text-muted text-lg mb-8">{magazine.description}</p>
         )}
-        <h2 className="text-lg font-semibold mb-4">Articles</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-4">Articles</h2>
         {publications.length === 0 ? (
           <p className="text-muted">No published articles yet.</p>
         ) : (
-          <ul className="space-y-4">
+          <ul className="space-y-3">
             {publications.map((pub) => (
               <ArticleRow
                 key={pub.id}

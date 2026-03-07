@@ -78,12 +78,12 @@ export default function SchedulePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Schedule</h1>
+      <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">Schedule</h1>
       <p className="text-muted text-sm mb-8">
         Content assigned to magazines and their publish dates.
       </p>
       <section className="mb-8">
-        <h2 className="text-lg font-semibold mb-4">Scheduled</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-4">Scheduled</h2>
         {scheduled.length === 0 ? (
           <p className="text-muted">No scheduled items.</p>
         ) : (
@@ -91,12 +91,12 @@ export default function SchedulePage() {
             {scheduled.map((pub) => (
               <li
                 key={pub.id}
-                className="flex justify-between items-center p-4 rounded-lg bg-card border border-border"
+                className="flex justify-between items-center p-4 rounded-xl bg-card border border-border hover:border-accent/30 transition-colors"
               >
                 <div>
                   <Link
                     href={`/dashboard/content/${pub.contentId}`}
-                    className="font-medium text-accent hover:underline"
+                    className="font-medium text-accent hover:opacity-90 no-underline transition-opacity"
                   >
                     {pub.content ? slugToTitle(pub.content.title) : "…"}
                   </Link>
@@ -115,7 +115,7 @@ export default function SchedulePage() {
         )}
       </section>
       <section>
-        <h2 className="text-lg font-semibold mb-4">Published</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-4">Published</h2>
         {published.length === 0 ? (
           <p className="text-muted">No published items yet.</p>
         ) : (
@@ -123,7 +123,7 @@ export default function SchedulePage() {
             {published.map((p) => (
               <li
                 key={p.id}
-                className="flex justify-between items-center p-4 rounded-lg bg-card border border-border"
+                className="flex justify-between items-center p-4 rounded-xl bg-card border border-border hover:border-accent/30 transition-colors"
               >
                 <div>
                   <Link
@@ -132,7 +132,7 @@ export default function SchedulePage() {
                         ? `/magazines/${p.magazine.userId}/${p.magazine.slug}/${p.content?.slug ?? ""}`
                         : "#"
                     }
-                    className="font-medium text-accent hover:underline"
+                    className="font-medium text-accent hover:opacity-90 no-underline transition-opacity"
                     target="_blank"
                   >
                     {p.content ? slugToTitle(p.content.title) : "…"}

@@ -77,10 +77,10 @@ export default function NewContentPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold mb-6">New content</h1>
+      <h1 className="text-2xl font-bold text-foreground tracking-tight mb-6">New content</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm text-muted mb-1">Title</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Title</label>
           <input
             type="text"
             value={title}
@@ -88,34 +88,34 @@ export default function NewContentPage() {
               setTitle(e.target.value);
               if (!slug) setSlug(slugify(e.target.value));
             }}
-            className="w-full px-3 py-2 rounded bg-card border border-border text-foreground"
+            className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
             required
           />
         </div>
         <div>
-          <label className="block text-sm text-muted mb-1">Slug</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Slug</label>
           <input
             type="text"
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
-            className="w-full px-3 py-2 rounded bg-card border border-border text-foreground"
+            className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
           />
         </div>
         <div>
-          <label className="block text-sm text-muted mb-1">Excerpt (optional)</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Excerpt (optional)</label>
           <textarea
             value={excerpt}
             onChange={(e) => setExcerpt(e.target.value)}
-            className="w-full px-3 py-2 rounded bg-card border border-border text-foreground"
+            className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
             rows={2}
           />
         </div>
         <div>
-          <label className="block text-sm text-muted mb-1">Category</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Category</label>
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full px-3 py-2 rounded bg-card border border-border text-foreground"
+            className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
           >
             <option value="">Select or add new below</option>
             {categories.map((c) => (
@@ -129,25 +129,25 @@ export default function NewContentPage() {
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
             placeholder="Or type new category name"
-            className="w-full mt-2 px-3 py-2 rounded bg-card border border-border text-foreground"
+            className="w-full mt-2 px-4 py-2.5 rounded-xl bg-background border border-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
           />
         </div>
         <div>
-          <label className="block text-sm text-muted mb-1">Tags (comma-separated)</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Tags (comma-separated)</label>
           <input
             type="text"
             value={tagsStr}
             onChange={(e) => setTagsStr(e.target.value)}
             placeholder="e.g. tech, howto"
-            className="w-full px-3 py-2 rounded bg-card border border-border text-foreground"
+            className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
           />
         </div>
         <div>
-          <label className="block text-sm text-muted mb-1">Body (Markdown)</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Body (Markdown)</label>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            className="w-full px-3 py-2 rounded bg-card border border-border text-foreground font-mono text-sm"
+            className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground font-mono text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
             rows={12}
             required
           />
@@ -156,13 +156,13 @@ export default function NewContentPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="px-4 py-2 rounded bg-accent text-background font-medium disabled:opacity-50"
+            className="px-4 py-2.5 rounded-xl bg-accent text-white font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
           >
             {submitting ? "Creating..." : "Create content"}
           </button>
           <Link
             href="/dashboard"
-            className="px-4 py-2 rounded border border-border text-muted hover:text-foreground"
+            className="px-4 py-2.5 rounded-xl border border-border text-muted hover:text-foreground hover:bg-neutral-50 transition-colors"
           >
             Cancel
           </Link>

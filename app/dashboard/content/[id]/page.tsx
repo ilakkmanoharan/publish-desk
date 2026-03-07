@@ -87,7 +87,7 @@ export default function ContentDetailPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold mb-2">{slugToTitle(content.title)}</h1>
+      <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">{slugToTitle(content.title)}</h1>
       <p className="text-muted text-sm mb-4">
         {content.category?.name}
         {content.tagNames?.length ? ` · ${content.tagNames.join(", ")}` : ""}
@@ -95,7 +95,7 @@ export default function ContentDetailPage() {
       {content.excerpt && (
         <p className="text-muted mb-6">{content.excerpt}</p>
       )}
-      <h2 className="text-lg font-semibold mb-2">Assign to magazine</h2>
+      <h2 className="text-lg font-semibold text-foreground mb-2">Assign to magazine</h2>
       <AssignForm
         userId={user.uid}
         contentId={id}
@@ -123,10 +123,10 @@ export default function ContentDetailPage() {
       />
       {publications.length > 0 && (
         <>
-          <h2 className="text-lg font-semibold mt-8 mb-2">Current assignments</h2>
+          <h2 className="text-lg font-semibold text-foreground mt-8 mb-2">Current assignments</h2>
           <ul className="space-y-2 text-sm">
             {publications.map((p) => (
-              <li key={p.magazineId} className="flex justify-between items-center">
+              <li key={p.magazineId} className="flex justify-between items-center p-3 rounded-xl bg-card border border-border">
                 <span>{p.magazineName}</span>
                 <span className="text-muted">
                   {p.status}

@@ -44,8 +44,8 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
-      <div className="w-full max-w-md rounded-2xl bg-card border border-border shadow-lg shadow-black/5 p-8">
-        <h1 className="text-2xl font-bold text-foreground mb-2">Log in</h1>
+      <div className="w-full max-w-md rounded-2xl bg-card border border-border shadow-md p-8">
+        <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">Log in</h1>
         <p className="text-muted text-sm mb-6">
           Sign in to your Publish Desk account.
         </p>
@@ -59,7 +59,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
+              className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
               required
             />
           </div>
@@ -72,7 +72,7 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
+              className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
               required
             />
           </div>
@@ -80,7 +80,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-4 py-2.5 rounded-lg bg-neutral-800 text-white font-medium hover:bg-neutral-900 disabled:opacity-50 transition-colors"
+            className="w-full px-4 py-2.5 rounded-xl bg-accent text-white font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
           >
             {loading ? "Signing in..." : "Log in"}
           </button>
@@ -92,7 +92,7 @@ export default function LoginPage() {
           type="button"
           onClick={handleGoogle}
           disabled={loading}
-          className="w-full px-4 py-2.5 rounded-lg border border-border text-foreground bg-background hover:bg-neutral-100 disabled:opacity-50 transition-colors"
+          className="w-full px-4 py-2.5 rounded-xl border border-border text-foreground bg-background hover:bg-neutral-50 disabled:opacity-50 transition-colors"
         >
           Continue with Google
         </button>

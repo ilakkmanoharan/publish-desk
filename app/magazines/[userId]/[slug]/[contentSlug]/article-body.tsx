@@ -13,6 +13,7 @@ const proseClasses = `
   prose-strong:font-semibold prose-strong:text-foreground
   prose-hr:border-border prose-hr:my-8
   prose-blockquote:border-l-accent prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-muted
+  prose-a:text-accent prose-a:no-underline prose-a:hover:underline
 `;
 
 export function ArticleBody({ content }: { content: string }) {

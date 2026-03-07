@@ -86,22 +86,22 @@ export function AssignForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm text-muted mb-1">Display title (optional)</label>
+        <label className="block text-sm font-medium text-foreground mb-1">Display title (optional)</label>
         <input
           type="text"
           value={displayTitle}
           onChange={(e) => setDisplayTitle(e.target.value)}
           placeholder={contentTitle}
-          className="w-full px-3 py-2 rounded bg-background border border-border text-foreground placeholder:text-muted"
+          className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
         />
         <p className="text-xs text-muted mt-1">Override how this article appears in the magazine. If empty, the content title is used (first letter capitalized).</p>
       </div>
       <div>
-        <label className="block text-sm text-muted mb-1">Magazine</label>
+        <label className="block text-sm font-medium text-foreground mb-1">Magazine</label>
         <select
           value={magazineId}
           onChange={(e) => setMagazineId(e.target.value)}
-          className="w-full px-3 py-2 rounded bg-card border border-border text-foreground"
+          className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
           required
         >
           <option value="">Select...</option>
@@ -113,11 +113,11 @@ export function AssignForm({
         </select>
       </div>
       <div>
-        <label className="block text-sm text-muted mb-1">Status</label>
+        <label className="block text-sm font-medium text-foreground mb-1">Status</label>
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value as "Draft" | "Scheduled" | "Published")}
-          className="w-full px-3 py-2 rounded bg-card border border-border text-foreground"
+          className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
         >
           <option value="Draft">Draft</option>
           <option value="Scheduled">Scheduled</option>
@@ -126,12 +126,12 @@ export function AssignForm({
       </div>
       {status === "Scheduled" && (
         <div>
-          <label className="block text-sm text-muted mb-1">Scheduled date (required)</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Scheduled date (required)</label>
           <input
             type="datetime-local"
             value={scheduledAt}
             onChange={(e) => setScheduledAt(e.target.value)}
-            className="w-full px-3 py-2 rounded bg-card border border-border text-foreground"
+            className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
             required
           />
         </div>
@@ -139,7 +139,7 @@ export function AssignForm({
       <button
         type="submit"
         disabled={submitting}
-        className="px-4 py-2 rounded bg-accent text-background font-medium disabled:opacity-50"
+        className="px-4 py-2.5 rounded-xl bg-accent text-white font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
       >
         {submitting ? "Saving..." : "Assign"}
       </button>

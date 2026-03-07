@@ -49,14 +49,14 @@ export function MagazineForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 rounded-lg bg-card border border-border max-w-md space-y-4">
+    <form onSubmit={handleSubmit} className="p-5 rounded-2xl bg-card border border-border max-w-md space-y-4 shadow-sm">
       <div>
-        <label className="block text-sm text-muted mb-1">Name</label>
+        <label className="block text-sm font-medium text-foreground mb-1">Name</label>
         <input
           type="text"
           value={name}
           onChange={(e) => onNameChange(e.target.value)}
-          className="w-full px-3 py-2 rounded bg-background border border-border text-foreground"
+          className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
           placeholder="e.g. Example Tech Digest"
           required
         />
@@ -67,17 +67,17 @@ export function MagazineForm({
           type="text"
           value={slug}
           onChange={(e) => setSlug(e.target.value)}
-          className="w-full px-3 py-2 rounded bg-background border border-border text-foreground"
+          className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
           placeholder="example-tech-digest"
         />
         <p className="text-xs text-muted mt-1">Auto-filled from the name. Used in the public URL (e.g. /magazines/you/systems-mind). You can edit it if needed.</p>
       </div>
       <div>
-        <label className="block text-sm text-muted mb-1">Description (optional)</label>
+        <label className="block text-sm font-medium text-foreground mb-1">Description (optional)</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full px-3 py-2 rounded bg-background border border-border text-foreground"
+          className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
           rows={2}
           placeholder="Short description for the magazine."
         />
@@ -85,7 +85,7 @@ export function MagazineForm({
       <button
         type="submit"
         disabled={submitting}
-        className="px-4 py-2 rounded bg-accent text-background font-medium disabled:opacity-50"
+        className="px-4 py-2.5 rounded-xl bg-accent text-white font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
       >
         {submitting ? "Adding..." : "Add magazine"}
       </button>

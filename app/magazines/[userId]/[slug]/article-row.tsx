@@ -51,11 +51,11 @@ export function ArticleRow({
   }
 
   return (
-    <li className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-2">
+    <li className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 rounded-xl bg-card border border-border hover:border-accent/30 transition-colors">
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 min-w-0">
         <Link
           href={articlePath}
-          className="text-accent hover:underline font-semibold"
+          className="text-accent hover:opacity-90 font-semibold no-underline transition-opacity"
         >
           {displayTitle}
         </Link>
@@ -72,7 +72,7 @@ export function ArticleRow({
         <button
           type="button"
           onClick={copyLink}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded text-sm text-muted hover:text-foreground"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-muted hover:text-foreground hover:bg-neutral-100 transition-colors"
           title="Copy link"
         >
           <CopyIcon />
@@ -81,7 +81,7 @@ export function ArticleRow({
         <button
           type="button"
           onClick={shareOnX}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded text-sm text-muted hover:text-foreground"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-muted hover:text-foreground hover:bg-neutral-100 transition-colors"
           title="Share on X"
         >
           <XIcon />

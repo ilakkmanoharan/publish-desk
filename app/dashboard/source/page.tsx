@@ -100,7 +100,7 @@ export default function SourcePage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-foreground mb-2">Content source</h1>
+      <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">Content source</h1>
       <p className="text-muted text-sm mb-6">
         Connect a GitHub repository to pull your content into the dashboard. We use all{" "}
         <strong>.md</strong> files and organize them by folder (first path segment = category).
@@ -110,7 +110,7 @@ export default function SourcePage() {
       {loading ? (
         <p className="text-muted">Loading...</p>
       ) : (
-        <div className="rounded-2xl bg-card border border-border shadow-lg shadow-black/5 p-6 space-y-4">
+        <div className="rounded-2xl bg-card border border-border shadow-md p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">
               GitHub repository URL
@@ -120,15 +120,15 @@ export default function SourcePage() {
               value={repoUrl}
               onChange={(e) => setRepoUrl(e.target.value)}
               placeholder="https://github.com/username/repo"
-              className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
+              className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
             />
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-3 flex-wrap">
             <button
               type="button"
               onClick={handleSave}
               disabled={saving}
-              className="px-4 py-2.5 rounded-lg border border-border text-foreground bg-background hover:bg-neutral-100 disabled:opacity-50 transition-colors"
+              className="px-4 py-2.5 rounded-xl border border-border text-foreground bg-background hover:bg-neutral-50 disabled:opacity-50 transition-colors"
             >
               {saving ? "Saving..." : "Save URL"}
             </button>
@@ -136,7 +136,7 @@ export default function SourcePage() {
               type="button"
               onClick={handleSync}
               disabled={syncing}
-              className="px-4 py-2.5 rounded-lg bg-neutral-800 text-white font-medium hover:bg-neutral-900 disabled:opacity-50 transition-colors"
+              className="px-4 py-2.5 rounded-xl bg-accent text-white font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
             >
               {syncing ? "Syncing..." : "Sync from GitHub"}
             </button>
