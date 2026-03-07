@@ -51,7 +51,7 @@ export default function ContentDetailPage() {
         setContent(null);
         return;
       }
-      const contentData = c as { categoryId: string; title: string; excerpt?: string; tagIds?: string[] };
+      const contentData = c as unknown as { categoryId: string; title: string; excerpt?: string; tagIds?: string[] };
       const cat = (categories as { id: string; name: string; slug: string }[]).find(
         (x) => x.id === contentData.categoryId
       );
