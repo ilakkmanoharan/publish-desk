@@ -76,7 +76,7 @@ function ArticlePageInner() {
             </Link>
           </div>
         </header>
-        <article className="mx-auto max-w-4xl px-6 py-12 md:py-16">
+        <article className="mx-auto max-w-4xl px-6 py-12 md:py-16 overflow-x-hidden min-w-0">
           <header className="max-w-3xl mx-auto text-center mb-10 md:mb-14">
             <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground tracking-tight leading-tight mb-4">
               {displayTitle}

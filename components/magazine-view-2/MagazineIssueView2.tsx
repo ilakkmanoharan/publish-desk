@@ -6,6 +6,7 @@ import {
   groupPublicationsByCategory,
   type PublicationCard,
 } from "@/lib/magazine-view-2-sections";
+import { MagazineImageFrame } from "./MagazineImageFrame";
 
 type Props = {
   userId: string;
@@ -19,13 +20,15 @@ type Props = {
 function CardCover({ seed }: { seed: string }) {
   const h = [...seed].reduce((a, c) => a + c.charCodeAt(0), 0) % 360;
   return (
-    <div
-      className="aspect-[16/10] w-full rounded-xl bg-gradient-to-br from-stone-800 to-stone-950"
-      style={{
-        backgroundImage: `linear-gradient(145deg, hsl(${h} 32% 20%), hsl(${(h + 50) % 360} 28% 14%))`,
-      }}
-      aria-hidden
-    />
+    <MagazineImageFrame ratio="landscape" className="shrink-0 rounded-t-xl rounded-b-none">
+      <div
+        className="bg-gradient-to-br from-stone-800 to-stone-950"
+        style={{
+          backgroundImage: `linear-gradient(145deg, hsl(${h} 32% 20%), hsl(${(h + 50) % 360} 28% 14%))`,
+        }}
+        aria-hidden
+      />
+    </MagazineImageFrame>
   );
 }
 
@@ -64,13 +67,13 @@ export function MagazineIssueView2({
       {publications.length === 0 ? (
         <div className="mx-auto max-w-3xl px-6 py-16 text-muted font-sans">No published articles yet.</div>
       ) : (
-        <div className="mx-auto max-w-5xl px-6 md:px-10">
+        <div className="mx-auto max-w-5xl px-6 md:px-10 min-w-0">
           {featured && (
-            <section className="pt-12 md:pt-16 pb-4">
+            <section className="pt-12 md:pt-16 pb-4 min-w-0">
               <p className="text-xs tracking-[0.2em] uppercase text-muted mb-4 font-sans">Cover story</p>
               <Link
                 href={articleHref(featured.content.slug)}
-                className="group block no-underline rounded-2xl border border-border overflow-hidden bg-card hover:border-accent/40 transition-all shadow-sm"
+                className="group block no-underline rounded-2xl border border-border overflow-hidden bg-card hover:border-accent/40 transition-all shadow-sm min-w-0"
               >
                 <CardCover seed={featured.id} />
                 <div className="p-6 md:p-8">
@@ -104,10 +107,10 @@ export function MagazineIssueView2({
               </header>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
                 {section.items.map((pub) => (
-                  <li key={pub.id}>
+                  <li key={pub.id} className="magazine-grid-item min-w-0">
                     <Link
                       href={articleHref(pub.content.slug)}
-                      className="group block no-underline rounded-xl border border-border overflow-hidden bg-card hover:border-accent/40 transition-all h-full flex flex-col"
+                      className="group block no-underline rounded-xl border border-border overflow-hidden bg-card hover:border-accent/40 transition-all h-full min-w-0 flex flex-col"
                     >
                       <CardCover seed={pub.id} />
                       <div className="p-5 flex flex-col flex-1">

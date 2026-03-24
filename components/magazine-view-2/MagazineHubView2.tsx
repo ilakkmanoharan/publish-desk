@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { Magazine } from "./types";
+import { MagazineImageFrame } from "./MagazineImageFrame";
 
 type Props = {
   magazines: Magazine[];
@@ -9,16 +10,19 @@ type Props = {
   openIssueQuery: string;
 };
 
+/** Decorative card top — same containment rules as photos (16:9 frame, clip, no flex blowout). */
 function PlaceholderCover({ seed }: { seed: string }) {
   const h = [...seed].reduce((a, c) => a + c.charCodeAt(0), 0) % 360;
   return (
-    <div
-      className="aspect-[16/10] w-full rounded-xl bg-gradient-to-br from-stone-800 via-stone-700 to-stone-900"
-      style={{
-        backgroundImage: `linear-gradient(135deg, hsl(${h} 35% 22%), hsl(${(h + 40) % 360} 30% 18%))`,
-      }}
-      aria-hidden
-    />
+    <MagazineImageFrame ratio="landscape" className="shrink-0 rounded-t-xl rounded-b-none">
+      <div
+        className="bg-gradient-to-br from-stone-800 via-stone-700 to-stone-900"
+        style={{
+          backgroundImage: `linear-gradient(135deg, hsl(${h} 35% 22%), hsl(${(h + 40) % 360} 30% 18%))`,
+        }}
+        aria-hidden
+      />
+    </MagazineImageFrame>
   );
 }
 
@@ -41,7 +45,7 @@ export function MagazineHubView2({ magazines, openIssueQuery }: Props) {
         </div>
       </section>
 
-      <div className="mx-auto max-w-5xl px-6 md:px-8">
+      <div className="mx-auto max-w-5xl min-w-0 px-6 md:px-8">
         <figure className="my-12 md:my-16 border-y border-border py-10 px-4 md:px-8">
           <blockquote className="font-display text-xl md:text-2xl italic text-center text-foreground leading-snug max-w-3xl mx-auto">
             Strong hierarchy: headline, intro, body—calm typography that lets the writing lead.
@@ -53,7 +57,7 @@ export function MagazineHubView2({ magazines, openIssueQuery }: Props) {
             <p className="text-xs tracking-[0.2em] uppercase text-muted mb-4 font-sans">Featured</p>
             <Link
               href={`/magazines/${featured.userId}/${featured.slug}${openIssueQuery}`}
-              className="group block no-underline rounded-2xl border border-border overflow-hidden bg-card hover:border-accent/40 transition-all shadow-sm hover:shadow-md"
+              className="group block no-underline rounded-2xl border border-border overflow-hidden bg-card hover:border-accent/40 transition-all shadow-sm hover:shadow-md min-w-0"
             >
               <PlaceholderCover seed={featured.id} />
               <div className="p-6 md:p-8">
@@ -77,10 +81,10 @@ export function MagazineHubView2({ magazines, openIssueQuery }: Props) {
             <div className="h-px bg-border mb-8" />
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
               {rest.map((m) => (
-                <li key={`${m.userId}-${m.slug}`}>
+                <li key={`${m.userId}-${m.slug}`} className="magazine-grid-item min-w-0">
                   <Link
                     href={`/magazines/${m.userId}/${m.slug}${openIssueQuery}`}
-                    className="group block no-underline rounded-xl border border-border overflow-hidden bg-card hover:border-accent/40 transition-all h-full flex flex-col"
+                    className="group block no-underline rounded-xl border border-border overflow-hidden bg-card hover:border-accent/40 transition-all h-full min-w-0 flex flex-col"
                   >
                     <PlaceholderCover seed={m.id} />
                     <div className="p-5 flex flex-col flex-1">

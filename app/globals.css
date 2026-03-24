@@ -45,8 +45,8 @@ a:focus-visible {
   background: rgb(180 83 9 / 0.15);
 }
 
-/* Magazine View 2 — article reading: multi-column body, pull-quote blockquotes */
-@media (min-width: 768px) {
+/* Magazine View 2 — article reading: multi-column from lg up (tablet stays single column → less squeeze/overlap) */
+@media (min-width: 1024px) {
   .magazine-reading-body {
     column-count: 2;
     column-gap: 2.5rem;
@@ -54,7 +54,11 @@ a:focus-visible {
   }
 }
 
+/* Prevent flex/grid blowout; long URLs wrap */
 .magazine-reading-body > * {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   break-inside: avoid;
 }
 
@@ -77,4 +81,88 @@ a:focus-visible {
 
 .magazine-reading-body blockquote p {
   margin: 0;
+}
+
+/* --- Magazine View 2: bounded image frames (no overflow / overlap) --- */
+.magazine-image-frame {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: #f3f4f6;
+}
+
+.magazine-image-frame[data-ratio="landscape"] {
+  aspect-ratio: 16 / 9;
+}
+
+.magazine-image-frame[data-ratio="square"] {
+  aspect-ratio: 1 / 1;
+}
+
+.magazine-image-frame[data-ratio="portrait"] {
+  aspect-ratio: 4 / 5;
+}
+
+.magazine-image-frame[data-ratio="wide"] {
+  aspect-ratio: 21 / 9;
+}
+
+/* Fill the frame; frame’s aspect-ratio reserves space before img load (CLS) */
+.magazine-image-frame > * {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.magazine-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-position: center;
+  /* max-width avoids rare intrinsic-width bugs; frame already clips */
+  max-width: 100%;
+}
+
+/* Diagrams / screenshots: full frame, letterbox if needed */
+.magazine-image--contain {
+  object-fit: contain;
+}
+
+/* Editorial photos when author marks alt with |cover */
+.magazine-image--cover {
+  object-fit: cover;
+}
+
+.magazine-reading-body .magazine-image-frame {
+  /* Slightly tighter radius inside prose */
+  border-radius: var(--radius);
+}
+
+.magazine-reading-body figure.magazine-reading-figure {
+  margin: 1.5rem 0;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.magazine-reading-body figure.magazine-reading-figure figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.magazine-reading-body img:not(.magazine-image),
+.magazine-reading-body svg,
+.magazine-reading-body canvas,
+.magazine-reading-body video {
+  max-width: 100%;
+  height: auto;
+}
+
+.magazine-view-2-hub .magazine-grid-item,
+.magazine-view-2-issue .magazine-grid-item {
+  min-width: 0;
 }
