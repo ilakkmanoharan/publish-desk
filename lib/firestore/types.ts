@@ -46,6 +46,8 @@ export type Publication = {
   status: "Draft" | "Scheduled" | "Published";
   /** Optional display title for this magazine; if unset, content.title is used (with first letter capitalized). */
   displayTitle?: string | null;
+  /** Order within the magazine (0 = first). Omitted on older documents until reordered. */
+  sortOrder?: number;
   scheduledAt?: { toDate: () => Date } | null;
   publishedAt?: { toDate: () => Date } | null;
   createdAt: { toDate: () => Date };

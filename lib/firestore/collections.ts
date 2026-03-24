@@ -9,6 +9,7 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  writeBatch,
   serverTimestamp,
   type DocumentData,
   type QueryConstraint,
@@ -153,7 +154,15 @@ export async function getContentById(
 
 export async function getMagazineById(
   magazineId: string
-): Promise<{ id: string; name: string; slug: string; userId?: string; categorySlugs?: string[]; tagNames?: string[] } | null> {
+): Promise<{
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  userId?: string;
+  categorySlugs?: string[];
+  tagNames?: string[];
+} | null> {
   const ref = doc(db(), COLLECTIONS.magazines, magazineId);
   const snap = await getDoc(ref);
   if (!snap.exists()) return null;
@@ -162,6 +171,7 @@ export async function getMagazineById(
     id: snap.id,
     name: (data?.name as string) ?? "",
     slug: (data?.slug as string) ?? "",
+    description: data?.description as string | undefined,
     userId: data?.userId as string | undefined,
     categorySlugs: data?.categorySlugs as string[] | undefined,
     tagNames: data?.tagNames as string[] | undefined,
@@ -188,6 +198,73 @@ export async function getPublicationsForContent(
       publishedAt: data?.publishedAt,
     };
   });
+}
+
+/**
+ * All publications for a magazine (dashboard).
+ * Must include userId in the query so Firestore rules can prove every matching doc is readable
+ * (rules: Published OR resource.data.userId == request.auth.uid).
+ */
+export async function getPublicationsForMagazine(
+  userId: string,
+  magazineId: string
+): Promise<
+  {
+    id: string;
+    contentId: string;
+    status: string;
+    displayTitle?: string | null;
+    sortOrder?: number;
+    scheduledAt?: unknown;
+    publishedAt?: unknown;
+  }[]
+> {
+  const q = query(
+    collection(db(), COLLECTIONS.publications),
+    where("userId", "==", userId),
+    where("magazineId", "==", magazineId)
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => {
+    const data = d.data();
+    const so = data?.sortOrder;
+    return {
+      id: d.id,
+      contentId: (data?.contentId as string) ?? "",
+      status: (data?.status as string) ?? "",
+      displayTitle: data?.displayTitle as string | null | undefined,
+      sortOrder: typeof so === "number" && !Number.isNaN(so) ? so : undefined,
+      scheduledAt: data?.scheduledAt,
+      publishedAt: data?.publishedAt,
+    };
+  });
+}
+
+export async function updatePublicationDisplayTitle(
+  publicationId: string,
+  displayTitle: string | null
+): Promise<void> {
+  await updateDoc(doc(db(), COLLECTIONS.publications, publicationId), {
+    displayTitle: displayTitle?.trim() ? displayTitle.trim() : null,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function deletePublication(publicationId: string): Promise<void> {
+  await deleteDoc(doc(db(), COLLECTIONS.publications, publicationId));
+}
+
+/** Persist order: first id in the array is sortOrder 0, etc. */
+export async function setMagazinePublicationSortOrder(orderedPublicationIds: string[]): Promise<void> {
+  const fs = db();
+  const batch = writeBatch(fs);
+  orderedPublicationIds.forEach((id, index) => {
+    batch.update(doc(fs, COLLECTIONS.publications, id), {
+      sortOrder: index,
+      updatedAt: serverTimestamp(),
+    });
+  });
+  await batch.commit();
 }
 
 // ——— Per-user (dashboard) ———
@@ -395,9 +472,22 @@ export async function upsertPublication(
     await updateDoc(doc(db(), COLLECTIONS.publications, existing.docs[0].id), payload);
     return existing.docs[0].id;
   }
+  const siblingsSnap = await getDocs(
+    query(
+      collection(db(), COLLECTIONS.publications),
+      where("userId", "==", userId),
+      where("magazineId", "==", data.magazineId)
+    )
+  );
+  let maxOrder = -1;
+  siblingsSnap.forEach((d) => {
+    const o = d.data().sortOrder;
+    if (typeof o === "number" && !Number.isNaN(o)) maxOrder = Math.max(maxOrder, o);
+  });
   const ref = await addDoc(collection(db(), COLLECTIONS.publications), {
     userId,
     ...payload,
+    sortOrder: maxOrder + 1,
     createdAt: serverTimestamp(),
   });
   return ref.id;

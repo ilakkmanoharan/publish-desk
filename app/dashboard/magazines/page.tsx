@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
 import { getUserMagazines } from "@/lib/firestore/collections";
 import { MagazineForm } from "./magazine-form";
@@ -30,17 +31,24 @@ export default function MagazinesPage() {
         ) : (
       <ul className="space-y-3">
         {magazines.map((m) => (
-          <li
-            key={m.id}
-            className="flex justify-between items-center p-4 rounded-xl bg-card border border-border hover:border-accent/30 transition-colors"
-          >
-            <div>
-              <span className="font-medium text-foreground">{m.name}</span>
-              <span className="text-muted text-sm ml-2">/{m.slug}</span>
-              {m.description && (
-                <p className="text-muted text-sm mt-1">{m.description}</p>
-              )}
-            </div>
+          <li key={m.id}>
+            <Link
+              href={`/dashboard/magazines/${m.id}`}
+              className="flex justify-between items-center p-4 rounded-xl bg-card border border-border hover:border-accent/30 transition-colors group cursor-pointer no-underline block"
+            >
+              <div>
+                <span className="font-medium text-foreground group-hover:text-accent transition-colors">
+                  {m.name}
+                </span>
+                <span className="text-muted text-sm ml-2">/{m.slug}</span>
+                {m.description && (
+                  <p className="text-muted text-sm mt-1">{m.description}</p>
+                )}
+              </div>
+              <span className="text-muted text-sm shrink-0 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden>
+                →
+              </span>
+            </Link>
           </li>
         ))}
       </ul>

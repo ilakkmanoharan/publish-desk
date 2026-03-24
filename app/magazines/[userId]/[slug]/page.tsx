@@ -8,6 +8,8 @@ import {
   getPublishedPublicationsForMagazine,
   getContentById,
 } from "@/lib/firestore/collections";
+import { sortPublicationsByMagazineOrder } from "@/lib/publication-order";
+import { slugToTitle } from "@/lib/format-title";
 import { ArticleRow } from "./article-row";
 
 function toDate(v: unknown): Date | null {
@@ -24,7 +26,14 @@ export default function MagazinePage() {
   const slug = params.slug as string;
   const [magazine, setMagazine] = useState<{ id: string; name: string; description?: string } | null>(null);
   const [publications, setPublications] = useState<
-    { id: string; contentId: string; displayTitle?: string | null; content: { title: string; slug: string }; publishedAt?: unknown }[]
+    {
+      id: string;
+      contentId: string;
+      displayTitle?: string | null;
+      sortOrder?: number;
+      content: { title: string; slug: string };
+      publishedAt?: unknown;
+    }[]
   >([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,20 +48,32 @@ export default function MagazinePage() {
       setMagazine(m as { id: string; name: string; description?: string });
       const pubs = await getPublishedPublicationsForMagazine((m as { id: string }).id, userId);
       const withContent = await Promise.all(
-        (pubs as { id: string; contentId: string; displayTitle?: string | null; publishedAt?: unknown }[]).map(
-          async (p) => {
-            const content = await getContentById(p.contentId);
-            const c = (content as { title: string; slug: string }) || { title: "", slug: "" };
-            return {
-              ...p,
-              content: c,
-              displayTitle: p.displayTitle?.trim() || null,
-            };
-          }
-        )
+        (pubs as {
+          id: string;
+          contentId: string;
+          displayTitle?: string | null;
+          sortOrder?: number;
+          publishedAt?: unknown;
+        }[]).map(async (p) => {
+          const content = await getContentById(p.contentId);
+          const c = (content as { title: string; slug: string }) || { title: "", slug: "" };
+          const so = p.sortOrder;
+          return {
+            ...p,
+            content: c,
+            displayTitle: p.displayTitle?.trim() || null,
+            sortOrder: typeof so === "number" && !Number.isNaN(so) ? so : undefined,
+          };
+        })
       );
       if (!cancelled) {
-        setPublications(withContent);
+        setPublications(
+          sortPublicationsByMagazineOrder(
+            withContent,
+            (p) => toDate(p.publishedAt),
+            (p) => slugToTitle(p.displayTitle ?? p.content.title)
+          )
+        );
       }
       setLoading(false);
     });
