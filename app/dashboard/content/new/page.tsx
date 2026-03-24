@@ -58,12 +58,19 @@ export default function NewContentPage() {
         tagIds.push(id);
       }
       const contentSlug = slug.trim() || slugify(title);
+      let categorySlug: string | undefined;
+      if (newCategoryName.trim()) {
+        categorySlug = slugify(newCategoryName.trim());
+      } else {
+        categorySlug = categories.find((c) => c.id === catId)?.slug;
+      }
       await createContent(user.uid, {
         title: title.trim(),
         slug: contentSlug,
         body: body.trim(),
         excerpt: excerpt.trim() || undefined,
         categoryId: catId,
+        categorySlug,
         tagIds,
       });
       router.push("/dashboard");

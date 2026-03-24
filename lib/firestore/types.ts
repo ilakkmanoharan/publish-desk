@@ -19,6 +19,8 @@ export type Content = {
   body: string;
   excerpt?: string;
   categoryId: string;
+  /** Denormalized folder slug (sync + new content); used for public Magazine View 2 sections. */
+  categorySlug?: string;
   tagIds: string[];
   createdAt: { toDate: () => Date };
   updatedAt: { toDate: () => Date };

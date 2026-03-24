@@ -44,3 +44,37 @@ a:focus-visible {
 ::selection {
   background: rgb(180 83 9 / 0.15);
 }
+
+/* Magazine View 2 — article reading: multi-column body, pull-quote blockquotes */
+@media (min-width: 768px) {
+  .magazine-reading-body {
+    column-count: 2;
+    column-gap: 2.5rem;
+    column-rule: 1px solid var(--border);
+  }
+}
+
+.magazine-reading-body > * {
+  break-inside: avoid;
+}
+
+.magazine-reading-body blockquote {
+  column-span: all;
+  margin: 2rem auto;
+  max-width: 36rem;
+  padding: 1.5rem 1.75rem;
+  border-left: 3px solid var(--accent);
+  border-right: 1px solid var(--border);
+  font-family: var(--font-playfair), Georgia, serif;
+  font-style: italic;
+  font-size: 1.35rem;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--foreground);
+  background: rgb(180 83 9 / 0.06);
+  border-radius: 0.5rem;
+}
+
+.magazine-reading-body blockquote p {
+  margin: 0;
+}

@@ -71,7 +71,12 @@ export async function getAllMagazines(categorySlug?: string, tagName?: string) {
 export async function getMagazineByUserIdAndSlug(
   userId: string,
   slug: string
-): Promise<{ id: string; name: string } | null> {
+): Promise<{
+  id: string;
+  name: string;
+  description?: string;
+  categorySlugs?: string[];
+} | null> {
   const q = query(
     collection(db(), COLLECTIONS.magazines),
     where("userId", "==", userId),
@@ -80,7 +85,12 @@ export async function getMagazineByUserIdAndSlug(
   const snap = await getDocs(q);
   if (snap.empty) return null;
   const data = snap.docs[0].data();
-  return { id: snap.docs[0].id, name: (data?.name as string) ?? "" };
+  return {
+    id: snap.docs[0].id,
+    name: (data?.name as string) ?? "",
+    description: data?.description as string | undefined,
+    categorySlugs: data?.categorySlugs as string[] | undefined,
+  };
 }
 
 export async function getPublishedPublicationsForMagazine(
@@ -140,7 +150,13 @@ export async function getPublicationByContentSlug(
 
 export async function getContentById(
   contentId: string
-): Promise<{ id: string; title: string; slug: string } | null> {
+): Promise<{
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  categorySlug?: string;
+} | null> {
   const ref = doc(db(), COLLECTIONS.content, contentId);
   const snap = await getDoc(ref);
   if (!snap.exists()) return null;
@@ -149,6 +165,8 @@ export async function getContentById(
     id: snap.id,
     title: (data?.title as string) ?? "",
     slug: (data?.slug as string) ?? "",
+    excerpt: data?.excerpt as string | undefined,
+    categorySlug: data?.categorySlug as string | undefined,
   };
 }
 
@@ -413,6 +431,7 @@ export async function createContent(
     body: string;
     excerpt?: string;
     categoryId: string;
+    categorySlug?: string;
     tagIds: string[];
   }
 ) {
@@ -433,6 +452,7 @@ export async function updateContent(
     body: string;
     excerpt: string;
     categoryId: string;
+    categorySlug: string;
     tagIds: string[];
   }>
 ) {

@@ -206,6 +206,7 @@ export async function POST(request: Request) {
         body: body.trim(),
         excerpt: excerpt || null,
         categoryId,
+        categorySlug,
         tagIds,
         updatedAt: new Date(),
       };
