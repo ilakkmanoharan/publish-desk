@@ -12,18 +12,19 @@ import type { Magazine } from "@/components/magazine-view-2/types";
 function HomePageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const view = searchParams.get("view") === "magazine2" ? "magazine2" : "list";
+  /** Magazine View 2 is default; `?view=list` selects the classic list. */
+  const view = searchParams.get("view") === "list" ? "list" : "magazine2";
   const { user, loading: authLoading, signOut } = useAuth();
   const [magazines, setMagazines] = useState<Magazine[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState("");
   const [tag, setTag] = useState("");
 
-  const openIssueQuery = "?view=magazine2";
+  const openIssueQuery = "";
 
   function setViewMode(next: "list" | "magazine2") {
     const p = new URLSearchParams(searchParams.toString());
-    if (next === "magazine2") p.set("view", "magazine2");
+    if (next === "list") p.set("view", "list");
     else p.delete("view");
     const q = p.toString();
     router.push(q ? `/?${q}` : "/");
@@ -140,7 +141,7 @@ function HomePageInner() {
               {magazines.map((m) => (
                 <li key={`${m.userId}-${m.slug}`}>
                   <Link
-                    href={`/magazines/${m.userId}/${m.slug}`}
+                    href={`/magazines/${m.userId}/${m.slug}?view=list`}
                     className="block p-5 rounded-2xl bg-card border border-border hover:border-accent/40 hover:shadow-md transition-all duration-200 no-underline"
                   >
                     <h2 className="font-semibold text-lg text-foreground">{m.name}</h2>

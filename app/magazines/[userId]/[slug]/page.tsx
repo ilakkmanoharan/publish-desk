@@ -29,7 +29,7 @@ function MagazinePageInner() {
   const searchParams = useSearchParams();
   const userId = params.userId as string;
   const slug = params.slug as string;
-  const view = searchParams.get("view") === "magazine2" ? "magazine2" : "list";
+  const view = searchParams.get("view") === "list" ? "list" : "magazine2";
 
   const [magazine, setMagazine] = useState<{
     id: string;
@@ -42,7 +42,7 @@ function MagazinePageInner() {
 
   function setViewMode(next: "list" | "magazine2") {
     const p = new URLSearchParams(searchParams.toString());
-    if (next === "magazine2") p.set("view", "magazine2");
+    if (next === "list") p.set("view", "list");
     else p.delete("view");
     const q = p.toString();
     router.push(q ? `/magazines/${userId}/${slug}?${q}` : `/magazines/${userId}/${slug}`);
@@ -116,7 +116,7 @@ function MagazinePageInner() {
   if (loading) return <div className="min-h-screen bg-background p-8">Loading...</div>;
   if (!magazine) return <div className="min-h-screen bg-background p-8">Magazine not found.</div>;
 
-  const homeHref = view === "magazine2" ? "/?view=magazine2" : "/";
+  const homeHref = view === "list" ? "/?view=list" : "/";
 
   return (
     <div className="min-h-screen bg-background">
@@ -165,6 +165,7 @@ function MagazinePageInner() {
                   contentSlug={pub.content.slug}
                   title={pub.displayTitle ?? pub.content.title}
                   publishedAt={toDate(pub.publishedAt)}
+                  listViewContext={view === "list"}
                 />
               ))}
             </ul>

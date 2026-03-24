@@ -6,7 +6,7 @@ import { MagazineImageFrame } from "./MagazineImageFrame";
 
 type Props = {
   magazines: Magazine[];
-  /** Appended to issue URLs (e.g. ?view=magazine2) */
+  /** Appended to issue URLs (empty when Magazine View 2 is the URL default) */
   openIssueQuery: string;
 };
 

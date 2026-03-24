@@ -17,19 +17,6 @@ export function MagazineViewToggle({ mode, onChange, magazine2Label }: Props) {
       <button
         type="button"
         role="tab"
-        aria-selected={mode === "list"}
-        onClick={() => onChange("list")}
-        className={`rounded-lg px-3 py-1.5 font-medium transition-colors ${
-          mode === "list"
-            ? "bg-foreground text-background"
-            : "text-muted hover:text-foreground"
-        }`}
-      >
-        List
-      </button>
-      <button
-        type="button"
-        role="tab"
         aria-selected={mode === "magazine2"}
         onClick={() => onChange("magazine2")}
         className={`rounded-lg px-3 py-1.5 font-medium transition-colors ${
@@ -39,6 +26,19 @@ export function MagazineViewToggle({ mode, onChange, magazine2Label }: Props) {
         }`}
       >
         {magazine2Label ?? "Magazine View 2"}
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={mode === "list"}
+        onClick={() => onChange("list")}
+        className={`rounded-lg px-3 py-1.5 font-medium transition-colors ${
+          mode === "list"
+            ? "bg-foreground text-background"
+            : "text-muted hover:text-foreground"
+        }`}
+      >
+        List
       </button>
     </div>
   );

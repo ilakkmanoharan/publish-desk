@@ -10,6 +10,8 @@ type Props = {
   contentSlug: string;
   title: string;
   publishedAt: Date | null;
+  /** Preserve classic list when returning from the article. */
+  listViewContext?: boolean;
 };
 
 export function ArticleRow({
@@ -18,10 +20,11 @@ export function ArticleRow({
   contentSlug,
   title,
   publishedAt,
+  listViewContext = false,
 }: Props) {
   const [copied, setCopied] = useState(false);
   const displayTitle = slugToTitle(title);
-  const articlePath = `/magazines/${userId}/${magazineSlug}/${contentSlug}`;
+  const articlePath = `/magazines/${userId}/${magazineSlug}/${contentSlug}${listViewContext ? "?view=list" : ""}`;
 
   function getArticleUrl() {
     if (typeof window === "undefined") return "";

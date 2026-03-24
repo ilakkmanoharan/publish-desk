@@ -56,9 +56,10 @@ function ArticlePageInner() {
 
   const titleSource = displayTitleOverride || content.title;
   const displayTitle = slugToTitle(titleSource);
+  const listReturn = searchParams.get("view") === "list";
   const magazineBackHref = layoutMagazine
-    ? `/magazines/${userId}/${slug}?view=magazine2`
-    : `/magazines/${userId}/${slug}`;
+    ? `/magazines/${userId}/${slug}`
+    : `/magazines/${userId}/${slug}${listReturn ? "?view=list" : ""}`;
 
   if (layoutMagazine) {
     return (
