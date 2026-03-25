@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
 import {
@@ -8,8 +8,10 @@ import {
   getUserMagazines,
   getUserPublications,
 } from "@/lib/firestore/collections";
+import { ProfileScheduleTab } from "./profile-schedule-tab";
+import { ProfileSourceTab } from "./profile-source-tab";
 
-type TabId = "overview" | "magazines" | "content";
+type TabId = "overview" | "magazines" | "content" | "schedule" | "source";
 
 function sanitizeSingleLine(s: string): string {
   return s
@@ -65,11 +67,28 @@ function StatCard({
   accentClass: string;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
+    <div className="relative overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#FAFAF9] p-5 ring-1 ring-black/[0.02]">
       <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9CA3AF]">{label}</p>
       <p className="mt-2 font-display text-3xl font-bold tracking-tight text-[#111827]">{value}</p>
       <div className={`absolute bottom-0 left-5 right-5 h-0.5 rounded-full ${accentClass}`} aria-hidden />
     </div>
+  );
+}
+
+/** White panel on gray dashboard canvas (CyberDefenders-style boxed sections). */
+function Panel({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section
+      className={`rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-8 ${className}`.trim()}
+    >
+      {children}
+    </section>
   );
 }
 
@@ -79,6 +98,7 @@ export default function ProfilePage() {
   const [magCount, setMagCount] = useState<number | null>(null);
   const [contentCount, setContentCount] = useState<number | null>(null);
   const [publishedCount, setPublishedCount] = useState<number | null>(null);
+  const [scheduledCount, setScheduledCount] = useState<number | null>(null);
   const [magazines, setMagazines] = useState<{ id: string; name: string; slug: string; description?: string }[]>(
     []
   );
@@ -96,16 +116,18 @@ export default function ProfilePage() {
     if (!user?.uid) return;
     let cancelled = false;
     (async () => {
-      const [mags, content, published] = await Promise.all([
+      const [mags, content, published, scheduled] = await Promise.all([
         getUserMagazines(user.uid),
         getUserContent(user.uid),
         getUserPublications(user.uid, "Published"),
+        getUserPublications(user.uid, "Scheduled"),
       ]);
       if (cancelled) return;
       setMagazines(mags);
       setMagCount(mags.length);
       setContentCount(content.length);
       setPublishedCount(published.length);
+      setScheduledCount(scheduled.length);
     })();
     return () => {
       cancelled = true;
@@ -133,7 +155,9 @@ export default function ProfilePage() {
 
   if (authLoading) {
     return (
-      <div className="max-w-5xl font-sans text-sm text-[#6B7280]">Loading profile…</div>
+      <div className="mx-auto w-full max-w-[1200px] px-4 font-sans text-sm text-[#6B7280] sm:px-6">
+        Loading profile…
+      </div>
     );
   }
 
@@ -144,9 +168,15 @@ export default function ProfilePage() {
   const profileUrl = publicBase ? `${publicBase}/` : "";
 
   return (
-    <div className="max-w-5xl">
+    <div className="mx-auto w-full max-w-[1200px] px-4 sm:px-6">
+      <div className="mb-6">
+        <h1 className="font-display text-2xl font-bold tracking-tight text-[#111827] md:text-3xl">Profile</h1>
+        <p className="mt-1 font-sans text-sm text-[#6B7280]">Editorial dashboard — boxed layout, centered column.</p>
+      </div>
+
+      <div className="flex flex-col gap-6">
       {/* Hero — editorial masthead */}
-      <section className="profile-page-hero relative overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white p-8 shadow-sm md:p-10">
+      <section className="profile-page-hero relative overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white p-8 shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-10">
         <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
           <div className="flex min-w-0 flex-col gap-6 sm:flex-row sm:items-start">
             <div className="relative flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#F3F4F6] ring-2 ring-[#E5E7EB] md:h-32 md:w-32">
@@ -184,7 +214,7 @@ export default function ProfilePage() {
                 <p className="mt-2 font-sans text-sm text-[#6B7280]">{email}</p>
               ) : null}
               <p className="mt-4 max-w-xl font-sans text-sm leading-relaxed text-[#6B7280]">
-                Your reader-facing presence on Publish Desk. Share magazines and editorial collections from one place.
+                Your editorial dashboard: identity, magazines, content, schedule, and GitHub source — in one place.
               </p>
             </div>
           </div>
@@ -234,8 +264,9 @@ export default function ProfilePage() {
         ) : null}
       </section>
 
-      {/* Tabs */}
-      <div className="mt-8 flex flex-wrap gap-2 rounded-2xl border border-[#E5E7EB] bg-[#F3F4F6]/80 p-2">
+      {/* Tabs — outer box, inner rail */}
+      <Panel className="!p-3 md:!p-4">
+        <div className="flex flex-wrap gap-2 rounded-xl bg-[#F3F4F6] p-1.5">
         <TabButton active={tab === "overview"} onClick={() => setTab("overview")}>
           <svg width={16} height={16} viewBox="0 0 24 24" fill="none" aria-hidden>
             <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="currentColor" strokeWidth="2" />
@@ -270,11 +301,33 @@ export default function ProfilePage() {
           </svg>
           Content
         </TabButton>
-      </div>
+        <TabButton active={tab === "schedule"} onClick={() => setTab("schedule")}>
+          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" aria-hidden>
+            <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2" />
+            <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" strokeWidth="2" />
+          </svg>
+          Schedule
+        </TabButton>
+        <TabButton active={tab === "source"} onClick={() => setTab("source")}>
+          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path
+              d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 009.91 3S8.91 4.18 8.91 5.5 7.5 7.5 7.5 7.5"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+          Source
+        </TabButton>
+        </div>
+      </Panel>
 
       {tab === "overview" && (
-        <>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Panel>
+          <h2 className="font-display text-xl font-semibold text-[#111827] md:text-2xl">Overview</h2>
+          <p className="mt-1 font-sans text-sm text-[#6B7280]">At a glance — counts and editorial focus.</p>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             <StatCard
               label="Magazines"
               value={magCount ?? "—"}
@@ -284,6 +337,11 @@ export default function ProfilePage() {
               label="Drafts & pieces"
               value={contentCount ?? "—"}
               accentClass="bg-gradient-to-r from-stone-600 to-stone-500"
+            />
+            <StatCard
+              label="Scheduled"
+              value={scheduledCount ?? "—"}
+              accentClass="bg-gradient-to-r from-violet-600 to-violet-500"
             />
             <StatCard
               label="Published"
@@ -297,14 +355,17 @@ export default function ProfilePage() {
             />
           </div>
 
-          <div className="mt-10 grid gap-6 lg:grid-cols-3">
-            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm">
+          <div className="mt-10 border-t border-[#E5E7EB] pt-10">
+            <h3 className="font-display text-lg font-semibold text-[#111827]">Desk</h3>
+            <p className="mt-1 font-sans text-sm text-[#6B7280]">Rhythm, reader preview, and shortcuts.</p>
+            <div className="mt-6 grid gap-6 lg:grid-cols-3">
+            <div className="rounded-xl border border-[#E5E7EB] bg-[#FAFAF9] p-6 ring-1 ring-black/[0.02]">
               <h2 className="font-display text-lg font-semibold text-[#111827]">Editorial rhythm</h2>
               <p className="mt-2 font-sans text-sm text-[#6B7280]">
                 Build issues on a steady cadence. Readers notice calm, predictable publishing.
               </p>
               <div className="mt-6 space-y-4">
-                <div className="rounded-xl border border-[#E5E7EB] bg-[#FAFAF9] p-4">
+                <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
                   <div className="flex items-center gap-2 font-sans text-sm font-medium text-[#111827]">
                     <span className="text-lg" aria-hidden>
                       ✦
@@ -313,7 +374,7 @@ export default function ProfilePage() {
                   </div>
                   <p className="mt-1 font-sans text-xs text-[#6B7280]">Ship your next magazine issue.</p>
                 </div>
-                <div className="rounded-xl border border-[#E5E7EB] bg-[#FAFAF9] p-4">
+                <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
                   <div className="flex items-center gap-2 font-sans text-sm font-medium text-[#111827]">
                     <span className="text-lg" aria-hidden>
                       ★
@@ -325,12 +386,12 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm lg:col-span-1">
+            <div className="rounded-xl border border-[#E5E7EB] bg-[#FAFAF9] p-6 ring-1 ring-black/[0.02] lg:col-span-1">
               <h2 className="font-display text-lg font-semibold text-[#111827]">Reading desk</h2>
               <p className="mt-2 font-sans text-sm text-[#6B7280]">
                 Preview how your work appears on the public magazines hub.
               </p>
-              <div className="mt-6 flex min-h-[140px] items-center justify-center rounded-xl border border-dashed border-[#E5E7EB] bg-[#FAFAF9] px-4">
+              <div className="mt-6 flex min-h-[140px] items-center justify-center rounded-xl border border-dashed border-[#D1D5DB] bg-white px-4">
                 <p className="text-center font-sans text-sm text-[#9CA3AF]">Your public hub updates as you publish.</p>
               </div>
               <Link
@@ -341,7 +402,7 @@ export default function ProfilePage() {
               </Link>
             </div>
 
-            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm">
+            <div className="rounded-xl border border-[#E5E7EB] bg-[#FAFAF9] p-6 ring-1 ring-black/[0.02]">
               <h2 className="font-display text-lg font-semibold text-[#111827]">Recent magazines</h2>
               <p className="mt-2 font-sans text-sm text-[#6B7280]">Quick access to titles you curate.</p>
               <ul className="mt-4 space-y-2">
@@ -352,7 +413,7 @@ export default function ProfilePage() {
                     <li key={m.id}>
                       <Link
                         href={`/dashboard/magazines/${m.id}`}
-                        className="block rounded-lg px-2 py-2 font-sans text-sm text-[#374151] no-underline transition-colors hover:bg-[#F3F4F6] hover:text-[#111827]"
+                        className="block rounded-lg px-2 py-2 font-sans text-sm text-[#374151] no-underline transition-colors hover:bg-white hover:text-[#111827]"
                       >
                         {m.name}
                         <span className="ml-2 text-[#9CA3AF]">/{m.slug}</span>
@@ -363,11 +424,12 @@ export default function ProfilePage() {
               </ul>
             </div>
           </div>
-        </>
+          </div>
+        </Panel>
       )}
 
       {tab === "magazines" && (
-        <div className="mt-8 rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm">
+        <Panel>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <h2 className="font-display text-xl font-semibold text-[#111827]">Your magazines</h2>
             <Link
@@ -399,11 +461,11 @@ export default function ProfilePage() {
               ))
             )}
           </ul>
-        </div>
+        </Panel>
       )}
 
       {tab === "content" && (
-        <div className="mt-8 rounded-2xl border border-[#E5E7EB] bg-white p-8 text-center shadow-sm">
+        <Panel className="text-center">
           <h2 className="font-display text-xl font-semibold text-[#111827]">Content library</h2>
           <p className="mx-auto mt-3 max-w-md font-sans text-sm leading-relaxed text-[#6B7280]">
             Drafts, edits, and assignments live in your main content workspace. Open it to continue writing and assign
@@ -415,8 +477,27 @@ export default function ProfilePage() {
           >
             Go to content
           </Link>
-        </div>
+        </Panel>
       )}
+
+      {tab === "schedule" && (
+        <Panel>
+          <h2 className="font-display text-xl font-semibold text-[#111827] md:text-2xl">Schedule</h2>
+          <p className="mt-1 font-sans text-sm text-[#6B7280]">
+            What is queued to publish and what is already live.
+          </p>
+          <div className="mt-6">
+            <ProfileScheduleTab userId={user.uid} />
+          </div>
+        </Panel>
+      )}
+
+      {tab === "source" && (
+        <Panel>
+          <ProfileSourceTab userId={user.uid} />
+        </Panel>
+      )}
+      </div>
     </div>
   );
 }

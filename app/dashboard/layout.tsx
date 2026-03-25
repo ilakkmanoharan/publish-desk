@@ -8,7 +8,7 @@ export default function DashboardLayout({
 }) {
   return (
     <DashboardGuard>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-[#F3F4F6]">
         <DashboardShell>{children}</DashboardShell>
       </div>
     </DashboardGuard>
