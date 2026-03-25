@@ -119,17 +119,20 @@ function MagazinePageInner() {
   const homeHref = view === "list" ? "/?view=list" : "/";
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="mx-auto max-w-5xl flex flex-wrap justify-between items-center gap-3 px-6 py-4">
-          <Link href="/" className="text-xl font-semibold text-accent no-underline hover:opacity-90 transition-opacity font-display">
+    <div className="flex min-h-screen min-h-[100dvh] flex-col bg-background">
+      <header className="sticky top-0 z-30 h-16 shrink-0 border-b border-stone-200/80 bg-[#fdfcfa]/90 backdrop-blur-md">
+        <div className="mx-auto flex h-full max-w-6xl flex-wrap items-center justify-between gap-3 px-6 md:px-8">
+          <Link
+            href="/"
+            className="font-display text-[20px] font-semibold leading-none text-stone-900 no-underline transition-opacity hover:opacity-85"
+          >
             Publish Desk
           </Link>
-          <div className="flex flex-wrap items-center gap-3">
-            <MagazineViewToggle mode={view} onChange={setViewMode} />
+          <div className="flex flex-wrap items-center gap-4 font-sans">
+            <MagazineViewToggle mode={view} onChange={setViewMode} magazine2Label="Magazine" />
             <Link
               href={homeHref}
-              className="text-sm text-muted hover:text-foreground no-underline transition-colors"
+              className="text-sm tracking-wide text-[#666666] no-underline transition-colors hover:text-stone-900"
             >
               ← All magazines
             </Link>
@@ -138,14 +141,16 @@ function MagazinePageInner() {
       </header>
 
       {view === "magazine2" ? (
-        <MagazineIssueView2
-          userId={userId}
-          magazineSlug={slug}
-          magazineName={magazine.name}
-          magazineDescription={magazine.description}
-          categorySlugs={magazine.categorySlugs}
-          publications={publications}
-        />
+        <div className="flex min-h-0 flex-1 flex-col">
+          <MagazineIssueView2
+            userId={userId}
+            magazineSlug={slug}
+            magazineName={magazine.name}
+            magazineDescription={magazine.description}
+            categorySlugs={magazine.categorySlugs}
+            publications={publications}
+          />
+        </div>
       ) : (
         <main className="mx-auto max-w-4xl px-6 py-14">
           <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">{magazine.name}</h1>
