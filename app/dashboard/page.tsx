@@ -64,7 +64,7 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="max-w-4xl">
+    <div className="mx-auto w-full max-w-6xl">
       <div className="rounded-2xl bg-card border border-border shadow-md p-6 md:p-8">
         <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Content library</h1>

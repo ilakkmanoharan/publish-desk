@@ -40,7 +40,7 @@ export function DashboardNav() {
         {navLink("/dashboard/schedule", "Schedule")}
         {navLink("/dashboard/source", "Content source")}
       </nav>
-      <div className="mt-auto pt-5 border-t border-border">
+      <div className="mt-6 pt-5 border-t border-border">
         <button
           type="button"
           onClick={handleLogout}
