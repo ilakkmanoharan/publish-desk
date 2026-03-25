@@ -14,6 +14,9 @@ import { ArticleRow } from "./article-row";
 import { MagazineIssueView2 } from "@/components/magazine-view-2/MagazineIssueView2";
 import { MagazineViewToggle } from "@/components/magazine-view-2/MagazineViewToggle";
 import type { PublicationCard } from "@/lib/magazine-view-2-sections";
+import { useAuth } from "@/contexts/auth-context";
+import { SiteAppHeader } from "@/components/site-app-header";
+import { SitePageGutter } from "@/components/site-page-gutter";
 
 function toDate(v: unknown): Date | null {
   if (!v) return null;
@@ -39,6 +42,7 @@ function MagazinePageInner() {
   } | null>(null);
   const [publications, setPublications] = useState<PublicationCard[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user, signOut, loading: authLoading } = useAuth();
 
   function setViewMode(next: "list" | "magazine2") {
     const p = new URLSearchParams(searchParams.toString());
@@ -113,32 +117,52 @@ function MagazinePageInner() {
     };
   }, [userId, slug]);
 
-  if (loading) return <div className="min-h-screen bg-background p-8">Loading...</div>;
-  if (!magazine) return <div className="min-h-screen bg-background p-8">Magazine not found.</div>;
-
   const homeHref = view === "list" ? "/?view=list" : "/";
 
+  const issueHeader = (
+    <SiteAppHeader
+      user={user}
+      authLoading={authLoading}
+      signOut={signOut}
+      leftSlot={
+        <MagazineViewToggle
+          mode={view}
+          onChange={setViewMode}
+          variant="saas"
+          magazine2Label="Magazine"
+        />
+      }
+      rightSlot={
+        <Link
+          href={homeHref}
+          className="shrink-0 whitespace-nowrap font-sans text-sm font-medium text-[#374151] no-underline transition-colors hover:text-[#111827]"
+        >
+          ← All magazines
+        </Link>
+      }
+    />
+  );
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen min-h-[100dvh] flex-col bg-[#F3F4F6]">
+        {issueHeader}
+        <div className="p-8 font-sans text-sm text-[#6B7280]">Loading...</div>
+      </div>
+    );
+  }
+  if (!magazine) {
+    return (
+      <div className="flex min-h-screen min-h-[100dvh] flex-col bg-[#F3F4F6]">
+        {issueHeader}
+        <div className="p-8">Magazine not found.</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen min-h-[100dvh] flex-col bg-background">
-      <header className="sticky top-0 z-30 h-16 shrink-0 border-b border-stone-200/80 bg-[#fdfcfa]/90 backdrop-blur-md">
-        <div className="mx-auto flex h-full max-w-6xl flex-wrap items-center justify-between gap-3 px-6 md:px-8">
-          <Link
-            href="/"
-            className="font-display text-[20px] font-semibold leading-none text-stone-900 no-underline transition-opacity hover:opacity-85"
-          >
-            Publish Desk
-          </Link>
-          <div className="flex flex-wrap items-center gap-4 font-sans">
-            <MagazineViewToggle mode={view} onChange={setViewMode} magazine2Label="Magazine" />
-            <Link
-              href={homeHref}
-              className="text-sm tracking-wide text-[#666666] no-underline transition-colors hover:text-stone-900"
-            >
-              ← All magazines
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className="flex min-h-screen min-h-[100dvh] flex-col bg-[#F3F4F6]">
+      {issueHeader}
 
       {view === "magazine2" ? (
         <div className="flex min-h-0 flex-1 flex-col">
@@ -152,29 +176,33 @@ function MagazinePageInner() {
           />
         </div>
       ) : (
-        <main className="mx-auto max-w-4xl px-6 py-14">
-          <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">{magazine.name}</h1>
-          {magazine.description && (
-            <p className="text-muted text-lg mb-8">{magazine.description}</p>
-          )}
-          <h2 className="text-lg font-semibold text-foreground mb-4">Articles</h2>
-          {publications.length === 0 ? (
-            <p className="text-muted">No published articles yet.</p>
-          ) : (
-            <ul className="space-y-3">
-              {publications.map((pub) => (
-                <ArticleRow
-                  key={pub.id}
-                  userId={userId}
-                  magazineSlug={slug}
-                  contentSlug={pub.content.slug}
-                  title={pub.displayTitle ?? pub.content.title}
-                  publishedAt={toDate(pub.publishedAt)}
-                  listViewContext={view === "list"}
-                />
-              ))}
-            </ul>
-          )}
+        <main>
+          <SitePageGutter className="py-14">
+            <div className="mx-auto max-w-4xl rounded-2xl border border-[#E5E7EB] bg-white p-8 shadow-sm md:p-10">
+              <h1 className="mb-2 font-display text-3xl font-bold tracking-tight text-[#111827]">{magazine.name}</h1>
+              {magazine.description && (
+                <p className="mb-8 font-sans text-lg text-[#6B7280]">{magazine.description}</p>
+              )}
+              <h2 className="mb-4 font-sans text-lg font-semibold text-[#111827]">Articles</h2>
+              {publications.length === 0 ? (
+                <p className="font-sans text-sm text-[#6B7280]">No published articles yet.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {publications.map((pub) => (
+                    <ArticleRow
+                      key={pub.id}
+                      userId={userId}
+                      magazineSlug={slug}
+                      contentSlug={pub.content.slug}
+                      title={pub.displayTitle ?? pub.content.title}
+                      publishedAt={toDate(pub.publishedAt)}
+                      listViewContext={view === "list"}
+                    />
+                  ))}
+                </ul>
+              )}
+            </div>
+          </SitePageGutter>
         </main>
       )}
     </div>

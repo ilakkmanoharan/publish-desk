@@ -1,5 +1,8 @@
 @private
 private/
+# Serve generic avatar at /private/user-icon.png without ignoring this public subtree
+!public/private/
+!public/private/**
 .env
 .env.local
 
