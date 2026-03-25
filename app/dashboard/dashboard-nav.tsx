@@ -37,6 +37,7 @@ export function DashboardNav() {
       <nav className="flex flex-col gap-0.5">
         {navLink("/dashboard", "Content")}
         {navLink("/dashboard/magazines", "Magazines")}
+        {navLink("/dashboard/profile", "Profile")}
         {navLink("/dashboard/schedule", "Schedule")}
         {navLink("/dashboard/source", "Content source")}
       </nav>

@@ -191,3 +191,12 @@ button[aria-label="Open account menu"] img[src="/private/user-icon.png"] {
   height: auto;
   object-fit: contain;
 }
+
+/* Profile hero: larger generic avatar than header; still cap high-res PNG */
+.profile-page-hero img[src="/private/user-icon.png"] {
+  max-width: 96px;
+  max-height: 96px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
