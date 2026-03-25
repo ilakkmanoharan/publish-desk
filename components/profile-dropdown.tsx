@@ -70,6 +70,8 @@ type Props = {
   user: User;
   onSignOut: () => Promise<void>;
   triggerVariant?: "icon" | "pill" | "headerIcon";
+  /** Dark dashboard header: 40px bordered avatar + hover ring */
+  headerAppearance?: "default" | "dark";
 };
 
 function ChevronDown({ className }: { className?: string }) {
@@ -80,7 +82,12 @@ function ChevronDown({ className }: { className?: string }) {
   );
 }
 
-export function ProfileDropdown({ user, onSignOut, triggerVariant = "icon" }: Props) {
+export function ProfileDropdown({
+  user,
+  onSignOut,
+  triggerVariant = "icon",
+  headerAppearance = "default",
+}: Props) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -173,8 +180,10 @@ export function ProfileDropdown({ user, onSignOut, triggerVariant = "icon" }: Pr
         aria-controls={open ? `${menuId}-menu` : undefined}
         onClick={() => setOpen((v) => !v)}
         className={
-          triggerVariant === "headerIcon"
-            ? "relative flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full transition-colors hover:bg-[#F3F4F6] focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400/50 focus-visible:ring-offset-2"
+          triggerVariant === "headerIcon" && headerAppearance === "dark"
+            ? "relative box-border flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-white/20 bg-[#1F2937] p-1 transition-all duration-200 ease-in-out hover:border-white/90 hover:shadow-[0_0_0_4px_rgba(255,255,255,0.06)] focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400/70 focus-visible:ring-offset-0 focus-visible:ring-offset-[#0B0B0C]"
+            : triggerVariant === "headerIcon"
+              ? "relative flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full transition-colors hover:bg-[#F3F4F6] focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400/50 focus-visible:ring-offset-2"
             : triggerVariant === "pill"
               ? "relative flex h-11 max-w-[220px] shrink-0 items-center gap-2.5 rounded-full border border-border bg-card py-1 pl-1 pr-2.5 text-left shadow-sm transition-colors hover:bg-stone-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2"
               : "relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted transition hover:bg-stone-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2"
@@ -182,7 +191,7 @@ export function ProfileDropdown({ user, onSignOut, triggerVariant = "icon" }: Pr
         aria-label="Open account menu"
       >
         {triggerVariant === "headerIcon" ? (
-          <span className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden">
+          <span className="relative flex h-full w-full shrink-0 items-center justify-center overflow-hidden rounded-full">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/private/user-icon.png"
@@ -192,10 +201,12 @@ export function ProfileDropdown({ user, onSignOut, triggerVariant = "icon" }: Pr
               height={28}
               decoding="async"
             />
-            <span
-              className="pointer-events-none absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500"
-              aria-hidden
-            />
+            {headerAppearance === "default" ? (
+              <span
+                className="pointer-events-none absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500"
+                aria-hidden
+              />
+            ) : null}
           </span>
         ) : (
           <>

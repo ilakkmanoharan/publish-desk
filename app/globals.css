@@ -182,6 +182,23 @@ a:focus-visible {
   animation: profile-dropdown-in 150ms ease-out forwards;
 }
 
+/* Dashboard headers: global `a` uses accent + underline */
+.dashboard-top-nav a,
+.dashboard-header-premium a {
+  text-decoration: none;
+}
+.dashboard-top-nav a:hover,
+.dashboard-header-premium a:hover {
+  text-decoration: none;
+}
+
+/* Dashboard nav: one flex child per item, no collapsing */
+.dashboard-header-premium .nav-item {
+  flex-shrink: 0;
+  width: fit-content;
+  min-width: 0;
+}
+
 /* High-res PNG (e.g. 1024²): intrinsic width must not expand flex parents */
 .profile-dropdown-panel img[src="/private/user-icon.png"],
 button[aria-label="Open account menu"] img[src="/private/user-icon.png"] {
@@ -190,6 +207,12 @@ button[aria-label="Open account menu"] img[src="/private/user-icon.png"] {
   width: auto;
   height: auto;
   object-fit: contain;
+}
+
+/* Dark dashboard header: 40px trigger with border + p-1 */
+.dashboard-header-premium button[aria-label="Open account menu"] img[src="/private/user-icon.png"] {
+  max-width: 28px;
+  max-height: 28px;
 }
 
 /* Profile hero: larger generic avatar than header; still cap high-res PNG */
