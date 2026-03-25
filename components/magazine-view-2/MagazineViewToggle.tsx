@@ -25,7 +25,7 @@ export function MagazineViewToggle({ mode, onChange, magazine2Label }: Props) {
             : "text-muted hover:text-foreground"
         }`}
       >
-        {magazine2Label ?? "Magazine View 2"}
+        {magazine2Label ?? "Magazines"}
       </button>
       <button
         type="button"
