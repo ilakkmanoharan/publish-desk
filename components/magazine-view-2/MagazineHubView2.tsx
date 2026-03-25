@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Magazine } from "./types";
 import { MagazineImageFrame } from "./MagazineImageFrame";
+import { SitePageGutter } from "@/components/site-page-gutter";
 
 type Props = {
   magazines: Magazine[];
@@ -31,45 +32,46 @@ export function MagazineHubView2({ magazines, openIssueQuery }: Props) {
 
   return (
     <div className="magazine-view-2-hub pb-16">
-      <section className="relative min-h-[280px] md:min-h-[360px] flex flex-col justify-end bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900 text-white px-6 py-10 md:px-10 md:py-12 mb-10 md:mb-14">
-        <div className="mx-auto w-full max-w-3xl">
-          <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-3 font-sans">
-            Publish Desk
-          </p>
-          <h1 className="font-display text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-4">
-            Magazines
-          </h1>
-          <p className="text-lg text-stone-300 max-w-xl font-sans leading-relaxed">
-            Browse editorial collections—story-driven reading, not just a feed.
-          </p>
-        </div>
-      </section>
+      <SitePageGutter>
+        <section className="relative mb-10 flex min-h-[280px] flex-col justify-end overflow-hidden rounded-2xl bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900 text-white shadow-md md:mb-14 md:min-h-[360px]">
+          <div className="px-8 py-10 md:px-12 md:py-12">
+            <div className="mx-auto w-full max-w-3xl">
+              <p className="mb-3 font-sans text-xs uppercase tracking-[0.2em] text-stone-400">Publish Desk</p>
+              <h1 className="mb-4 font-display text-4xl font-bold leading-tight tracking-tight md:text-5xl">
+                Magazines
+              </h1>
+              <p className="max-w-xl font-sans text-lg leading-relaxed text-stone-300">
+                Browse editorial collections—story-driven reading, not just a feed.
+              </p>
+            </div>
+          </div>
+        </section>
 
-      <div className="mx-auto max-w-5xl min-w-0 px-6 md:px-8">
-        <figure className="my-12 md:my-16 border-y border-border py-10 px-4 md:px-8">
-          <blockquote className="font-display text-xl md:text-2xl italic text-center text-foreground leading-snug max-w-3xl mx-auto">
-            Strong hierarchy: headline, intro, body—calm typography that lets the writing lead.
-          </blockquote>
-        </figure>
+        <div className="min-w-0">
+          <figure className="my-12 rounded-2xl border border-[#E5E7EB] bg-white px-6 py-10 shadow-sm md:my-16 md:px-10">
+            <blockquote className="mx-auto max-w-3xl text-center font-display text-xl italic leading-snug text-[#111827] md:text-2xl">
+              Strong hierarchy: headline, intro, body—calm typography that lets the writing lead.
+            </blockquote>
+          </figure>
 
         {featured && (
           <section className="mb-14 md:mb-20">
-            <p className="text-xs tracking-[0.2em] uppercase text-muted mb-4 font-sans">Featured</p>
+            <p className="mb-4 font-sans text-xs uppercase tracking-[0.2em] text-[#6B7280]">Featured</p>
             <Link
               href={`/magazines/${featured.userId}/${featured.slug}${openIssueQuery}`}
-              className="group block no-underline rounded-2xl border border-border overflow-hidden bg-card hover:border-accent/40 transition-all shadow-sm hover:shadow-md min-w-0"
+              className="group block min-w-0 overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm transition-all no-underline hover:border-indigo-200 hover:shadow-md"
             >
               <PlaceholderCover seed={featured.id} />
               <div className="p-6 md:p-8">
-                <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground group-hover:text-accent transition-colors mb-2">
+                <h2 className="mb-2 font-display text-2xl font-semibold text-[#111827] transition-colors group-hover:text-accent md:text-3xl">
                   {featured.name}
                 </h2>
                 {featured.description && (
-                  <p className="text-muted font-sans text-base leading-relaxed max-w-2xl">
+                  <p className="max-w-2xl font-sans text-base leading-relaxed text-[#6B7280]">
                     {featured.description}
                   </p>
                 )}
-                <span className="inline-block mt-4 text-sm font-medium text-accent">Open issue →</span>
+                <span className="mt-4 inline-block text-sm font-medium text-accent">Open issue →</span>
               </div>
             </Link>
           </section>
@@ -77,22 +79,22 @@ export function MagazineHubView2({ magazines, openIssueQuery }: Props) {
 
         {rest.length > 0 && (
           <section>
-            <p className="text-xs tracking-[0.2em] uppercase text-muted mb-2 font-sans">More issues</p>
-            <div className="h-px bg-border mb-8" />
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
+            <p className="mb-2 font-sans text-xs uppercase tracking-[0.2em] text-[#6B7280]">More issues</p>
+            <div className="mb-8 h-px bg-[#E5E7EB]" />
+            <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-8">
               {rest.map((m) => (
                 <li key={`${m.userId}-${m.slug}`} className="magazine-grid-item min-w-0">
                   <Link
                     href={`/magazines/${m.userId}/${m.slug}${openIssueQuery}`}
-                    className="group block no-underline rounded-xl border border-border overflow-hidden bg-card hover:border-accent/40 transition-all h-full min-w-0 flex flex-col"
+                    className="group flex h-full min-w-0 flex-col overflow-hidden rounded-xl border border-[#E5E7EB] bg-white shadow-sm transition-all no-underline hover:border-indigo-200 hover:shadow-md"
                   >
                     <PlaceholderCover seed={m.id} />
-                    <div className="p-5 flex flex-col flex-1">
-                      <h3 className="font-display text-xl font-semibold text-foreground group-hover:text-accent transition-colors mb-2">
+                    <div className="flex flex-1 flex-col p-5">
+                      <h3 className="mb-2 font-display text-xl font-semibold text-[#111827] transition-colors group-hover:text-accent">
                         {m.name}
                       </h3>
                       {m.description && (
-                        <p className="text-muted text-sm leading-relaxed line-clamp-3 font-sans flex-1">
+                        <p className="line-clamp-3 flex-1 font-sans text-sm leading-relaxed text-[#6B7280]">
                           {m.description}
                         </p>
                       )}
@@ -103,7 +105,8 @@ export function MagazineHubView2({ magazines, openIssueQuery }: Props) {
             </ul>
           </section>
         )}
-      </div>
+        </div>
+      </SitePageGutter>
     </div>
   );
 }

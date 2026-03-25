@@ -8,6 +8,8 @@ import { getAllMagazines } from "@/lib/firestore/collections";
 import { MagazineHubView2 } from "@/components/magazine-view-2/MagazineHubView2";
 import { MagazineViewToggle } from "@/components/magazine-view-2/MagazineViewToggle";
 import type { Magazine } from "@/components/magazine-view-2/types";
+import { ProfileDropdown } from "@/components/profile-dropdown";
+import { SitePageGutter } from "@/components/site-page-gutter";
 
 function HomePageInner() {
   const router = useRouter();
@@ -39,102 +41,113 @@ function HomePageInner() {
   }, [category, tag]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="mx-auto max-w-4xl flex flex-wrap justify-between items-center gap-3 px-6 py-4">
-          <Link href="/" className="text-xl font-semibold text-accent no-underline hover:opacity-90 transition-opacity font-display">
-            Publish Desk
-          </Link>
-          <div className="flex flex-wrap items-center gap-3 md:gap-4">
+    <div className="min-h-screen bg-[#F3F4F6]">
+      <header className="sticky top-0 z-50 h-[72px] w-full shrink-0 border-b border-[#E5E7EB] bg-white">
+        <div className="mx-auto flex h-full w-full max-w-[1200px] items-center justify-between px-6">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-4">
+            <Link
+              href="/"
+              className="shrink-0 font-display text-xl font-semibold text-accent no-underline transition-opacity hover:opacity-90"
+            >
+              Publish Desk
+            </Link>
             <MagazineViewToggle mode={view} onChange={setViewMode} />
-            <nav className="flex items-center gap-5">
-              {authLoading ? (
-                <span className="text-muted text-sm">Loading...</span>
-              ) : user ? (
-                <>
-                  <Link href="/dashboard" className="text-sm text-muted hover:text-foreground no-underline transition-colors">
-                    Dashboard
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => signOut()}
-                    className="text-sm text-muted hover:text-foreground bg-transparent border-0 cursor-pointer"
-                  >
-                    Sign out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link href="/login" className="text-sm text-muted hover:text-foreground no-underline transition-colors">
-                    Log in
-                  </Link>
-                  <Link href="/signup" className="text-sm font-medium text-accent hover:underline">
-                    Sign up
-                  </Link>
-                </>
-              )}
-            </nav>
           </div>
+          <nav className="flex shrink-0 items-center gap-4 font-sans">
+            {authLoading ? (
+              <span className="text-sm text-[#6B7280]">Loading...</span>
+            ) : user ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="text-[15px] font-medium text-[#374151] no-underline transition-colors hover:text-[#111827]"
+                >
+                  Dashboard
+                </Link>
+                <ProfileDropdown user={user} onSignOut={signOut} triggerVariant="headerIcon" />
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-[15px] font-medium text-[#374151] no-underline transition-colors hover:text-[#111827]"
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/signup"
+                  className="rounded-lg bg-[#111827] px-4 py-2.5 text-sm font-medium text-white no-underline transition-opacity hover:opacity-90"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
+          </nav>
         </div>
       </header>
 
       {view === "magazine2" ? (
         <>
-          <div className="mx-auto max-w-5xl px-6 pt-8 pb-0 flex flex-wrap gap-3">
+          <SitePageGutter className="flex flex-wrap gap-3 pt-8 pb-2">
             <input
               type="text"
               placeholder="Filter by category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="px-4 py-2.5 rounded-xl bg-card border border-border text-foreground text-sm w-52 placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
+              className="h-10 min-w-[200px] flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-sans text-sm text-[#111827] shadow-sm placeholder:text-[#9CA3AF] focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/25 sm:max-w-xs sm:flex-none"
             />
             <input
               type="text"
               placeholder="Filter by tag"
               value={tag}
               onChange={(e) => setTag(e.target.value)}
-              className="px-4 py-2.5 rounded-xl bg-card border border-border text-foreground text-sm w-52 placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
+              className="h-10 min-w-[200px] flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-sans text-sm text-[#111827] shadow-sm placeholder:text-[#9CA3AF] focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/25 sm:max-w-xs sm:flex-none"
             />
-          </div>
+          </SitePageGutter>
           {loading ? (
-            <div className="py-24 text-center text-muted font-sans">Loading magazines...</div>
+            <SitePageGutter>
+              <p className="py-24 text-center font-sans text-sm text-[#6B7280]">Loading magazines…</p>
+            </SitePageGutter>
           ) : magazines.length === 0 ? (
-            <div className="mx-auto max-w-lg px-6 py-20 text-center">
-              <p className="text-muted mb-2">No magazines yet.</p>
-              <p className="text-sm text-foreground">Sign up and create one from your dashboard.</p>
-            </div>
+            <SitePageGutter>
+              <div className="mx-auto max-w-lg py-20 text-center">
+                <p className="mb-2 text-[#6B7280]">No magazines yet.</p>
+                <p className="text-sm text-[#111827]">Sign up and create one from your dashboard.</p>
+              </div>
+            </SitePageGutter>
           ) : (
             <MagazineHubView2 magazines={magazines} openIssueQuery={openIssueQuery} />
           )}
         </>
       ) : (
-        <main className="mx-auto max-w-4xl px-6 py-14">
+        <SitePageGutter className="py-14">
+          <main>
           <div className="mb-10">
-            <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">Magazines</h1>
-            <p className="text-muted text-lg">Browse magazines by category and tags.</p>
+            <h1 className="mb-2 text-3xl font-bold tracking-tight text-[#111827]">Magazines</h1>
+            <p className="font-sans text-lg text-[#6B7280]">Browse magazines by category and tags.</p>
           </div>
-          <div className="flex flex-wrap gap-3 mb-10">
+          <div className="mb-10 flex flex-wrap gap-3">
             <input
               type="text"
               placeholder="Filter by category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="px-4 py-2.5 rounded-xl bg-card border border-border text-foreground text-sm w-52 placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
+              className="h-10 w-52 rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-sans text-sm text-[#111827] shadow-sm placeholder:text-[#9CA3AF] focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/25"
             />
             <input
               type="text"
               placeholder="Filter by tag"
               value={tag}
               onChange={(e) => setTag(e.target.value)}
-              className="px-4 py-2.5 rounded-xl bg-card border border-border text-foreground text-sm w-52 placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
+              className="h-10 w-52 rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-sans text-sm text-[#111827] shadow-sm placeholder:text-[#9CA3AF] focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/25"
             />
           </div>
           {loading ? (
-            <div className="py-12 text-center text-muted">Loading magazines...</div>
+            <div className="py-12 text-center font-sans text-sm text-[#6B7280]">Loading magazines…</div>
           ) : magazines.length === 0 ? (
-            <div className="rounded-2xl bg-card border border-border p-10 text-center">
-              <p className="text-muted mb-1">No magazines yet.</p>
-              <p className="text-sm text-foreground">Sign up and create one from your dashboard.</p>
+            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-10 text-center shadow-sm">
+              <p className="mb-1 text-[#6B7280]">No magazines yet.</p>
+              <p className="text-sm text-[#111827]">Sign up and create one from your dashboard.</p>
             </div>
           ) : (
             <ul className="space-y-4">
@@ -142,18 +155,17 @@ function HomePageInner() {
                 <li key={`${m.userId}-${m.slug}`}>
                   <Link
                     href={`/magazines/${m.userId}/${m.slug}?view=list`}
-                    className="block p-5 rounded-2xl bg-card border border-border hover:border-accent/40 hover:shadow-md transition-all duration-200 no-underline"
+                    className="block rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm transition-all duration-200 no-underline hover:border-indigo-200 hover:shadow-md"
                   >
-                    <h2 className="font-semibold text-lg text-foreground">{m.name}</h2>
-                    {m.description && (
-                      <p className="text-muted text-sm mt-1.5">{m.description}</p>
-                    )}
+                    <h2 className="text-lg font-semibold text-[#111827]">{m.name}</h2>
+                    {m.description && <p className="mt-1.5 font-sans text-sm text-[#6B7280]">{m.description}</p>}
                   </Link>
                 </li>
               ))}
             </ul>
           )}
-        </main>
+          </main>
+        </SitePageGutter>
       )}
     </div>
   );

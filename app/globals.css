@@ -166,3 +166,28 @@ a:focus-visible {
 .magazine-view-2-issue .magazine-grid-item {
   min-width: 0;
 }
+
+@keyframes profile-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-dropdown-panel {
+  animation: profile-dropdown-in 150ms ease-out forwards;
+}
+
+/* High-res PNG (e.g. 1024²): intrinsic width must not expand flex parents */
+.profile-dropdown-panel img[src="/private/user-icon.png"],
+button[aria-label="Open account menu"] img[src="/private/user-icon.png"] {
+  max-width: 28px;
+  max-height: 28px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
