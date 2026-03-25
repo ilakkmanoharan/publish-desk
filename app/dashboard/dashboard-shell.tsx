@@ -4,9 +4,9 @@ import { DashboardNav } from "./dashboard-nav";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex">
+    <div className="flex min-h-screen flex-col bg-[#F3F4F6]">
       <DashboardNav />
-      <main className="min-h-screen flex-1 min-w-0 bg-[#F3F4F6] pl-[15rem] pr-6 pt-8 pb-12 md:pr-10">
+      <main className="min-h-0 min-w-0 flex-1 px-6 pb-12 pt-8 md:px-10">
         {children}
       </main>
     </div>
