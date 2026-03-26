@@ -155,14 +155,18 @@ export function ProfileDropdown({
     "flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-left text-sm font-medium text-[#374151] no-underline outline-none transition-colors hover:bg-[#F3F4F6] hover:text-[#111827] hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-0";
 
   const avatarInner = user.photoURL ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={user.photoURL}
-      alt=""
-      className="h-9 w-9 rounded-full object-cover"
-      width={36}
-      height={36}
-    />
+    <span className="block h-9 w-9 shrink-0 overflow-hidden rounded-full">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={user.photoURL}
+        alt=""
+        width={36}
+        height={36}
+        className="block h-9 w-9 object-cover"
+        loading="lazy"
+        decoding="async"
+      />
+    </span>
   ) : (
     <span className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-200 font-sans text-sm font-semibold text-stone-700">
       {initial}
@@ -239,29 +243,33 @@ export function ProfileDropdown({
           className="profile-dropdown-panel absolute right-0 top-full z-[1000] mt-2 w-[280px] max-w-[min(280px,100vw-1.5rem)] origin-top-right overflow-hidden rounded-lg border border-[#E5E7EB] bg-white p-4 font-sans shadow-[0_4px_24px_rgba(15,23,42,0.08),0_0_0_1px_rgba(15,23,42,0.04)] [&_a]:no-underline [&_a:hover]:no-underline [&_a:focus-visible]:outline-none"
         >
           <div className="flex min-w-0 items-start gap-3">
-            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E5E7EB] ring-1 ring-[#E5E7EB]">
+            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[#E5E7EB] ring-1 ring-[#E5E7EB]">
               {user.photoURL ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={user.photoURL}
                   alt=""
-                  className="h-full min-h-0 w-full min-w-0 object-cover"
                   width={40}
                   height={40}
-                />
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src="/private/user-icon.png"
-                  alt=""
-                  className="max-h-7 max-w-7 object-contain"
-                  width={28}
-                  height={28}
+                  className="block h-10 w-10 object-cover"
+                  loading="lazy"
                   decoding="async"
                 />
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/private/user-icon.png"
+                    alt=""
+                    className="max-h-7 max-w-7 object-contain"
+                    width={28}
+                    height={28}
+                    decoding="async"
+                  />
+                </div>
               )}
               <span
-                className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500"
+                className="absolute bottom-0 right-0 z-10 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500"
                 aria-hidden
               />
             </div>

@@ -98,26 +98,30 @@ export function AccountSettingsShell({ children }: { children: ReactNode }) {
       <div className="mb-8 rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-4">
-            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#F1F5F9] ring-1 ring-[#E2E8F0]">
+            <div className="size-16 shrink-0 overflow-hidden rounded-full bg-[#E5E7EB] ring-1 ring-[#E2E8F0]">
               {user?.photoURL ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={user.photoURL}
                   alt=""
-                  className="h-full w-full object-cover"
                   width={64}
                   height={64}
-                />
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src="/private/user-icon.png"
-                  alt=""
-                  className="max-h-10 max-w-10 object-contain"
-                  width={40}
-                  height={40}
+                  className="block h-16 w-16 object-cover"
+                  loading="lazy"
                   decoding="async"
                 />
+              ) : (
+                <div className="flex h-16 w-16 items-center justify-center bg-[#F1F5F9]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/private/user-icon.png"
+                    alt=""
+                    className="max-h-10 max-w-10 object-contain opacity-90"
+                    width={40}
+                    height={40}
+                    decoding="async"
+                  />
+                </div>
               )}
             </div>
             <div className="min-w-0">

@@ -26,6 +26,8 @@ export function getFirebaseFirestore(): Firestore {
 }
 
 export function getFirebaseStorage(): FirebaseStorage {
+  // Use the default bucket from `initializeApp(firebaseConfig)` (storageBucket field).
+  // Passing a second `gs://` argument can mismatch some projects; default is most reliable.
   if (!storage) storage = getStorage(getFirebaseApp());
   return storage;
 }

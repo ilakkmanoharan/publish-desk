@@ -16,6 +16,7 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   signOut as firebaseSignOut,
+  reload,
 } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase/client";
 
@@ -26,6 +27,8 @@ type AuthContextValue = {
   signUp: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  /** Reload current user from Firebase (e.g. after updateProfile). */
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -65,6 +68,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await firebaseSignOut(auth);
   }, [auth]);
 
+  const refreshUser = useCallback(async () => {
+    const u = auth.currentUser;
+    if (!u) return;
+    await reload(u);
+    setUser(auth.currentUser);
+  }, [auth]);
+
   const value: AuthContextValue = {
     user,
     loading,
@@ -72,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signUp,
     signInWithGoogle,
     signOut,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -179,29 +179,33 @@ export default function ProfilePage() {
       <section className="profile-page-hero relative overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white p-8 shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-10">
         <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
           <div className="flex min-w-0 flex-col gap-6 sm:flex-row sm:items-start">
-            <div className="relative flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#F3F4F6] ring-2 ring-[#E5E7EB] md:h-32 md:w-32">
+            <div className="h-28 w-28 shrink-0 overflow-hidden rounded-full bg-[#E5E7EB] ring-2 ring-[#E5E7EB] md:h-32 md:w-32">
               {user.photoURL ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={user.photoURL}
                   alt=""
-                  className="h-full min-h-0 w-full min-w-0 object-cover"
                   width={128}
                   height={128}
-                />
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src="/private/user-icon.png"
-                  alt=""
-                  className="max-h-20 max-w-20 object-contain md:max-h-24 md:max-w-24"
-                  width={96}
-                  height={96}
+                  className="block h-28 w-28 object-cover md:h-32 md:w-32"
+                  loading="lazy"
                   decoding="async"
                 />
+              ) : (
+                <div className="flex h-28 w-28 items-center justify-center bg-[#F3F4F6] md:h-32 md:w-32">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/private/user-icon.png"
+                    alt=""
+                    className="max-h-20 max-w-20 object-contain md:max-h-24 md:max-w-24"
+                    width={96}
+                    height={96}
+                    decoding="async"
+                  />
+                </div>
               )}
               <span
-                className="absolute bottom-1 right-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500"
+                className="absolute bottom-1 right-1 z-10 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500"
                 aria-hidden
               />
             </div>
