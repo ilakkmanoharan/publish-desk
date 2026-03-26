@@ -367,7 +367,7 @@ export default function AccountProfileSettingsPage() {
                 <button
                   type="submit"
                   disabled={saving || profileLoading}
-                  className="inline-flex min-h-[44px] min-w-[140px] items-center justify-center rounded-lg bg-[#4F46E5] px-6 py-2.5 font-sans text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex min-h-[44px] min-w-[140px] items-center justify-center rounded-lg bg-[#4F46E5] px-6 py-2.5 font-sans text-sm font-semibold !text-white shadow-sm transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {saving ? "Saving…" : "Update profile"}
                 </button>

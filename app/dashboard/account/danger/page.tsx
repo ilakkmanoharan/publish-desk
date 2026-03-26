@@ -14,7 +14,7 @@ export default function AccountDangerPage() {
         <button
           type="button"
           disabled
-          className="mt-6 rounded-lg bg-[#EF4444] px-5 py-2.5 font-sans text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-6 rounded-lg bg-[#EF4444] px-5 py-2.5 font-sans text-sm font-semibold !text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
         >
           Delete my account
         </button>

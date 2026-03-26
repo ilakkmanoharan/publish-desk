@@ -1,9 +1,22 @@
 "use client";
 
 import type { ComponentProps, ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { useAuth } from "@/contexts/auth-context";
+import { formatUserFacingFirebaseError } from "@/lib/firebase/user-facing-error";
+import {
+  getUserProfileDocument,
+  normalizeOptionalHttpUrl,
+  saveUserProfileDocument,
+} from "@/lib/user-profile";
 
-function FieldLabel({ children }: { children: ReactNode }) {
-  return <label className="mb-1.5 block font-sans text-xs font-semibold text-[#374151]">{children}</label>;
+function FieldLabel({ children, htmlFor }: { children: ReactNode; htmlFor?: string }) {
+  return (
+    <label htmlFor={htmlFor} className="mb-1.5 block font-sans text-xs font-semibold text-[#374151]">
+      {children}
+    </label>
+  );
 }
 
 function Helper({ children }: { children: ReactNode }) {
@@ -11,7 +24,7 @@ function Helper({ children }: { children: ReactNode }) {
 }
 
 const inputClass =
-  "w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2.5 pl-10 font-sans text-sm text-[#0F172A] shadow-sm transition-colors placeholder:text-[#94A3B8] focus:border-[#6366F1] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/20 disabled:cursor-not-allowed disabled:bg-[#F8FAFC]";
+  "w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2.5 pl-10 font-sans text-sm text-[#0F172A] shadow-sm transition-colors placeholder:text-[#94A3B8] focus:border-[#6366F1] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/20";
 
 function InputWithIcon({
   icon,
@@ -50,51 +63,198 @@ function IconX() {
   );
 }
 
-export default function AccountSocialPage() {
+function IconToastCheck() {
   return (
-    <div className="space-y-8">
-      <div className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
+    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M20 6L9 17l-5-5"
+        stroke="currentColor"
+        strokeWidth="2.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export default function AccountSocialPage() {
+  const { user } = useAuth();
+  const [linkedin, setLinkedin] = useState("");
+  const [github, setGithub] = useState("");
+  const [twitter, setTwitter] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saveToastOpen, setSaveToastOpen] = useState(false);
+  const [saveToastSeq, setSaveToastSeq] = useState(0);
+  const [toastPortalReady, setToastPortalReady] = useState(false);
+
+  useEffect(() => {
+    setToastPortalReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!saveToastOpen) return;
+    const id = window.setTimeout(() => setSaveToastOpen(false), 5000);
+    return () => window.clearTimeout(id);
+  }, [saveToastOpen, saveToastSeq]);
+
+  const load = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const doc = await getUserProfileDocument(user.uid);
+      setLinkedin(doc?.linkedinUrl ?? "");
+      setGithub(doc?.githubProfileUrl ?? "");
+      setTwitter(doc?.twitterUrl ?? "");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not load social profiles.");
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!user) return;
+    setError(null);
+    setSaving(true);
+    try {
+      const linkedinUrl = normalizeOptionalHttpUrl(linkedin);
+      const githubProfileUrl = normalizeOptionalHttpUrl(github);
+      const twitterUrl = normalizeOptionalHttpUrl(twitter);
+      await saveUserProfileDocument(user.uid, {
+        linkedinUrl,
+        githubProfileUrl,
+        twitterUrl,
+      });
+      setLinkedin(linkedinUrl ?? "");
+      setGithub(githubProfileUrl ?? "");
+      setTwitter(twitterUrl ?? "");
+      setSaveToastSeq((n) => n + 1);
+      setSaveToastOpen(true);
+    } catch (err) {
+      setError(formatUserFacingFirebaseError(err, "Could not save."));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (!user) return null;
+
+  const saveToast =
+    toastPortalReady && saveToastOpen
+      ? createPortal(
+          <div
+            className="fixed bottom-[max(1rem,env(safe-area-inset-bottom,0px))] right-[max(1rem,env(safe-area-inset-right,0px))] z-[200] flex w-[min(100vw-2rem,22rem)] items-stretch overflow-hidden rounded-xl border border-[#0F172A] bg-white font-sans shadow-[0_10px_40px_-10px_rgba(15,23,42,0.25)] sm:bottom-6 sm:right-6"
+            role="status"
+            aria-live="polite"
+          >
+            <div className="flex min-w-0 flex-1 items-center gap-3 py-3 pl-4 pr-2">
+              <div
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#22C55E] text-white"
+                aria-hidden
+              >
+                <IconToastCheck />
+              </div>
+              <p className="text-sm font-medium leading-snug text-[#0F172A]">Social profile updated successfully.</p>
+            </div>
+            <div className="my-2 w-px shrink-0 self-stretch bg-[#0F172A]" aria-hidden />
+            <button
+              type="button"
+              onClick={() => setSaveToastOpen(false)}
+              className="flex w-11 shrink-0 items-center justify-center text-[#0F172A] transition-colors hover:bg-[#F8FAFC] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#6366F1]"
+              aria-label="Dismiss notification"
+            >
+              <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>,
+          document.body
+        )
+      : null;
+
+  return (
+    <>
+      {saveToast}
+      <div className="space-y-8">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
         <div className="border-b border-[#E2E8F0] px-6 py-5 sm:px-8">
           <h1 className="font-sans text-xl font-bold tracking-tight text-[#0F172A] sm:text-2xl">Social profiles</h1>
           <p className="mt-1.5 font-sans text-sm text-[#64748B]">
-            Enter links to your social profiles below. Saving is coming soon.
+            Links are stored on your user document in Firestore (fields:{" "}
+            <span className="font-mono text-[11px]">linkedinUrl</span>,{" "}
+            <span className="font-mono text-[11px]">githubProfileUrl</span>,{" "}
+            <span className="font-mono text-[11px]">twitterUrl</span>). Leave a field blank to clear it.
           </p>
         </div>
-        <div className="space-y-6 px-6 py-6 sm:px-8">
-          <div>
-            <FieldLabel>LinkedIn</FieldLabel>
-            <InputWithIcon
-              type="url"
-              disabled
-              placeholder="https://linkedin.com/in/username"
-              icon={<IconLinkedIn />}
-            />
-            <Helper>Example: https://www.linkedin.com/in/your-handle</Helper>
-          </div>
-          <div>
-            <FieldLabel>GitHub</FieldLabel>
-            <InputWithIcon
-              type="url"
-              disabled
-              placeholder="https://github.com/username"
-              icon={<IconGitHub />}
-            />
-            <Helper>Example: https://github.com/your-handle</Helper>
-          </div>
-          <div>
-            <FieldLabel>Twitter (X)</FieldLabel>
-            <InputWithIcon type="url" disabled placeholder="https://x.com/username" icon={<IconX />} />
-            <Helper>Example: https://x.com/your-handle</Helper>
-          </div>
-          <button
-            type="button"
-            disabled
-            className="rounded-lg bg-[#4F46E5] px-5 py-2.5 font-sans text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            Update social profile
-          </button>
+
+        <form className="space-y-6 px-6 py-6 sm:px-8" onSubmit={onSubmit}>
+          {error ? (
+            <div className="rounded-lg bg-red-50 px-4 py-3 font-sans text-sm text-red-800" role="alert">
+              {error}
+            </div>
+          ) : null}
+          {loading ? (
+            <p className="font-sans text-sm text-[#64748B]">Loading…</p>
+          ) : (
+            <>
+              <div>
+                <FieldLabel htmlFor="social-linkedin">LinkedIn</FieldLabel>
+                <InputWithIcon
+                  id="social-linkedin"
+                  type="url"
+                  value={linkedin}
+                  onChange={(ev) => setLinkedin(ev.target.value)}
+                  placeholder="https://linkedin.com/in/username"
+                  autoComplete="url"
+                  icon={<IconLinkedIn />}
+                />
+                <Helper>Example: https://www.linkedin.com/in/your-handle</Helper>
+              </div>
+              <div>
+                <FieldLabel htmlFor="social-github">GitHub</FieldLabel>
+                <InputWithIcon
+                  id="social-github"
+                  type="url"
+                  value={github}
+                  onChange={(ev) => setGithub(ev.target.value)}
+                  placeholder="https://github.com/username"
+                  autoComplete="url"
+                  icon={<IconGitHub />}
+                />
+                <Helper>Example: https://github.com/your-handle</Helper>
+              </div>
+              <div>
+                <FieldLabel htmlFor="social-twitter">Twitter (X)</FieldLabel>
+                <InputWithIcon
+                  id="social-twitter"
+                  type="url"
+                  value={twitter}
+                  onChange={(ev) => setTwitter(ev.target.value)}
+                  placeholder="https://x.com/username"
+                  autoComplete="url"
+                  icon={<IconX />}
+                />
+                <Helper>Example: https://x.com/your-handle</Helper>
+              </div>
+              <button
+                type="submit"
+                disabled={saving}
+                className="rounded-lg bg-[#4F46E5] px-5 py-2.5 font-sans text-sm font-semibold !text-white shadow-sm transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {saving ? "Saving…" : "Update Social Profile"}
+              </button>
+            </>
+          )}
+        </form>
         </div>
-      </div>
 
       <div className="rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
         <div className="border-b border-[#E2E8F0] px-6 py-5 sm:px-8">
@@ -123,5 +283,6 @@ export default function AccountSocialPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

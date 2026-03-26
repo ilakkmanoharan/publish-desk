@@ -11,12 +11,32 @@ export type UserProfileFields = {
   country?: string | null;
   /** Mirror of Firebase Auth / Storage URL for dashboards and backups */
   photoURL?: string | null;
+  /** Public profile links (separate from `githubRepoUrl` content source) */
+  linkedinUrl?: string | null;
+  githubProfileUrl?: string | null;
+  twitterUrl?: string | null;
 };
 
 export type UserProfileDocument = UserProfileFields & {
   githubRepoUrl?: string | null;
   profileUpdatedAt?: unknown;
 };
+
+/** Trim; empty → null; otherwise valid http(s) URL string. */
+export function normalizeOptionalHttpUrl(raw: string): string | null {
+  const t = raw.trim();
+  if (!t) return null;
+  let u: URL;
+  try {
+    u = new URL(t);
+  } catch {
+    throw new Error("Use a full URL starting with https:// (or http://).");
+  }
+  if (u.protocol !== "http:" && u.protocol !== "https:") {
+    throw new Error("URL must use http:// or https://.");
+  }
+  return u.href;
+}
 
 function db() {
   return getFirebaseFirestore();
