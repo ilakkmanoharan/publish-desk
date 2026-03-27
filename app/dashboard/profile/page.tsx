@@ -476,7 +476,7 @@ export default function ProfilePage() {
             pieces to magazines.
           </p>
           <Link
-            href="/dashboard"
+            href="/dashboard/content"
             className="mt-6 inline-flex rounded-xl bg-[#111827] px-5 py-2.5 font-sans text-sm font-medium text-white no-underline transition-opacity hover:opacity-90"
           >
             Go to content

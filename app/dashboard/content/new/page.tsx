@@ -73,7 +73,7 @@ export default function NewContentPage() {
         categorySlug,
         tagIds,
       });
-      router.push("/dashboard");
+      router.push("/dashboard/content");
       router.refresh();
     } finally {
       setSubmitting(false);
@@ -168,7 +168,7 @@ export default function NewContentPage() {
             {submitting ? "Creating..." : "Create content"}
           </button>
           <Link
-            href="/dashboard"
+            href="/dashboard/content"
             className="px-4 py-2.5 rounded-xl border border-border text-muted hover:text-foreground hover:bg-neutral-50 transition-colors"
           >
             Cancel

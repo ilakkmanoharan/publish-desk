@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import matter from "gray-matter";
+import { FieldValue, type Firestore } from "firebase-admin/firestore";
 import { getAdminApp, getAdminAuth, getAdminFirestore } from "@/lib/firebase-admin";
+import {
+  deskPremiumOnly,
+  getPublishDeskBlock,
+  isPublishDeskFrontMatterActive,
+  normalizeMagazineSlugs,
+  normalizeTagNames,
+} from "@/lib/publish-desk-front-matter";
 
 const GITHUB_API = "https://api.github.com";
 
@@ -18,6 +26,72 @@ function slugify(str: string): string {
     .toLowerCase()
     .replace(/\s+/g, "-")
     .replace(/[^a-z0-9-]/g, "");
+}
+
+async function upsertPublicationAdmin(
+  db: Firestore,
+  uid: string,
+  contentId: string,
+  magazineId: string
+): Promise<string> {
+  const pubs = db.collection("publications");
+  const existing = await pubs
+    .where("userId", "==", uid)
+    .where("contentId", "==", contentId)
+    .where("magazineId", "==", magazineId)
+    .limit(1)
+    .get();
+  const publishedAt = new Date();
+  const base = {
+    userId: uid,
+    contentId,
+    magazineId,
+    status: "Published",
+    displayTitle: null,
+    scheduledAt: null,
+    publishedAt,
+    updatedAt: FieldValue.serverTimestamp(),
+  };
+  if (!existing.empty) {
+    await existing.docs[0].ref.update(base);
+    return existing.docs[0].id;
+  }
+  const siblings = await pubs.where("userId", "==", uid).where("magazineId", "==", magazineId).get();
+  let maxOrder = -1;
+  siblings.forEach((d) => {
+    const o = d.data().sortOrder;
+    if (typeof o === "number" && !Number.isNaN(o)) maxOrder = Math.max(maxOrder, o);
+  });
+  const ref = await pubs.add({
+    ...base,
+    sortOrder: maxOrder + 1,
+    createdAt: FieldValue.serverTimestamp(),
+  });
+  return ref.id;
+}
+
+async function mergeMagazineFilterSlugsAdmin(
+  db: Firestore,
+  magazineId: string,
+  categorySlug: string,
+  tagNames: string[]
+): Promise<void> {
+  const ref = db.collection("magazines").doc(magazineId);
+  const snap = await ref.get();
+  if (!snap.exists) return;
+  const data = snap.data()!;
+  const currentSlugs = (data.categorySlugs as string[]) || [];
+  const currentTags = (data.tagNames as string[]) || [];
+  const newSlugs = currentSlugs.includes(categorySlug) ? currentSlugs : [...currentSlugs, categorySlug];
+  const newTags = [...currentTags];
+  for (const t of tagNames) {
+    if (!newTags.includes(t)) newTags.push(t);
+  }
+  await ref.update({
+    categorySlugs: newSlugs,
+    tagNames: newTags,
+    updatedAt: FieldValue.serverTimestamp(),
+  });
 }
 
 export async function POST(request: Request) {
@@ -124,11 +198,12 @@ export async function POST(request: Request) {
     const tagIdsByName: Record<string, string> = {};
     let categoriesCreated = 0;
     let contentUpserted = 0;
+    let publicationsLinked = 0;
+    const magazineSlugMisses: string[] = [];
 
     for (const item of mdPaths) {
       const path = item.path;
       const parts = path.split("/");
-      const categorySlug = parts.length > 1 ? slugify(parts[0]) : "uncategorized";
       const fileName = parts[parts.length - 1];
       const fileBase = fileName.replace(/\.md$/i, "");
 
@@ -146,12 +221,42 @@ export async function POST(request: Request) {
       }
 
       const { data: frontMatter, content: body } = matter(raw);
-      const title = frontMatter.title ?? fileBase.replace(/-/g, " ");
-      const slug = frontMatter.slug ?? slugify(fileBase);
-      const excerpt = frontMatter.excerpt ?? null;
-      const tagNames = Array.isArray(frontMatter.tags)
-        ? frontMatter.tags.map((t: string) => String(t).trim().toLowerCase())
-        : [];
+      const fm = frontMatter as Record<string, unknown>;
+      const deskActive = isPublishDeskFrontMatterActive(fm);
+      const desk = deskActive ? getPublishDeskBlock(fm) : null;
+      const useDesk = Boolean(desk);
+
+      let title =
+        (useDesk && typeof desk!.title === "string" && desk!.title.trim()) ||
+        (typeof frontMatter.title === "string" && frontMatter.title.trim()) ||
+        fileBase.replace(/-/g, " ");
+      let slug =
+        (useDesk && typeof desk!.slug === "string" && desk!.slug.trim() && slugify(desk!.slug.trim())) ||
+        (frontMatter.slug && slugify(String(frontMatter.slug))) ||
+        slugify(fileBase);
+      let excerpt: string | null;
+      if (useDesk && desk && "excerpt" in desk) {
+        excerpt =
+          desk.excerpt === null || desk.excerpt === undefined ? null : String(desk.excerpt);
+      } else {
+        excerpt =
+          frontMatter.excerpt !== undefined && frontMatter.excerpt !== null
+            ? String(frontMatter.excerpt)
+            : null;
+      }
+      let tagNames: string[] = useDesk && "tags" in desk!
+        ? normalizeTagNames(desk!.tags)
+        : Array.isArray(frontMatter.tags)
+          ? frontMatter.tags.map((t: string) => String(t).trim().toLowerCase()).filter(Boolean)
+          : [];
+
+      let categorySlug = parts.length > 1 ? slugify(parts[0]) : "uncategorized";
+      if (useDesk && typeof desk!.category === "string" && desk!.category.trim()) {
+        categorySlug = slugify(desk!.category.trim());
+      }
+
+      const premiumOnly = useDesk ? deskPremiumOnly(desk!) : false;
+      const magazineSlugsFromDesk = useDesk ? normalizeMagazineSlugs(desk!.magazines) : [];
 
       if (!categoryIdsBySlug[categorySlug]) {
         const existing = await categoriesCol
@@ -162,7 +267,10 @@ export async function POST(request: Request) {
         if (!existing.empty) {
           categoryIdsBySlug[categorySlug] = existing.docs[0].id;
         } else {
-          const categoryName = parts[0] ?? "Uncategorized";
+          const categoryName =
+            useDesk && typeof desk!.category === "string" && desk!.category.trim()
+              ? desk!.category.trim()
+              : parts[0] ?? "Uncategorized";
           const ref = await categoriesCol.add({
             userId: uid,
             name: categoryName,
@@ -208,17 +316,45 @@ export async function POST(request: Request) {
         categoryId,
         categorySlug,
         tagIds,
+        premiumOnly,
         updatedAt: new Date(),
       };
 
+      let contentId: string;
       if (!existingContent.empty) {
         await existingContent.docs[0].ref.update(contentData);
+        contentId = existingContent.docs[0].id;
       } else {
-        await contentCol.add({
+        const newRef = await contentCol.add({
           ...contentData,
           createdAt: new Date(),
         });
+        contentId = newRef.id;
       }
+
+      if (useDesk && magazineSlugsFromDesk.length > 0) {
+        const magsCol = db.collection("magazines");
+        for (const rawMagSlug of magazineSlugsFromDesk) {
+          const magSlug = slugify(rawMagSlug);
+          if (!magSlug) continue;
+          const magSnap = await magsCol
+            .where("userId", "==", uid)
+            .where("slug", "==", magSlug)
+            .limit(1)
+            .get();
+          if (magSnap.empty) {
+            magazineSlugMisses.push(`${path} → magazine slug "${rawMagSlug}"`);
+            continue;
+          }
+          const magazineId = magSnap.docs[0].id;
+          await upsertPublicationAdmin(db, uid, contentId, magazineId);
+          if (categorySlug) {
+            await mergeMagazineFilterSlugsAdmin(db, magazineId, categorySlug, tagNames);
+          }
+          publicationsLinked++;
+        }
+      }
+
       contentUpserted++;
     }
 
@@ -232,6 +368,8 @@ export async function POST(request: Request) {
       categoriesCreated,
       contentUpserted,
       filesScanned: mdPaths.length,
+      publicationsLinked,
+      magazineSlugMisses: magazineSlugMisses.length ? magazineSlugMisses : undefined,
     });
   } catch (e) {
     console.error("sync-github error", e);

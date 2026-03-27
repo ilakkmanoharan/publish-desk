@@ -320,7 +320,7 @@ export default function MagazineArticlesPage() {
       ) : rows.length === 0 && !loadError ? (
         <p className="text-muted text-sm">
           No content assigned yet. Assign pieces from{" "}
-          <Link href="/dashboard" className="text-accent hover:opacity-90">
+          <Link href="/dashboard/content" className="text-accent hover:opacity-90">
             Content
           </Link>
           .

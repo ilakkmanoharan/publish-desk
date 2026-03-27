@@ -22,6 +22,8 @@ export type Content = {
   /** Denormalized folder slug (sync + new content); used for public Magazine View 2 sections. */
   categorySlug?: string;
   tagIds: string[];
+  /** When true, treat as premium-only (e.g. gate in readers); set via optional `publish_desk` YAML on GitHub sync. */
+  premiumOnly?: boolean;
   createdAt: { toDate: () => Date };
   updatedAt: { toDate: () => Date };
 };

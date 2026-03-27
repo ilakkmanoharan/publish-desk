@@ -5,8 +5,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 
+function isDashboardHomeActive(pathname: string) {
+  return pathname === "/dashboard" || pathname === "/dashboard/";
+}
+
 function isContentActive(pathname: string) {
-  return pathname === "/dashboard" || pathname.startsWith("/dashboard/content");
+  return pathname.startsWith("/dashboard/content");
 }
 
 function isMagazinesActive(pathname: string) {
@@ -104,6 +108,7 @@ export function DashboardNav() {
         <Link
           href="/dashboard"
           className="shrink-0 text-[18px] font-semibold leading-none tracking-[0.35px] text-white no-underline transition-opacity duration-200 hover:opacity-90 hover:no-underline"
+          aria-current={isDashboardHomeActive(pathname) ? "page" : undefined}
         >
           Publish Desk
         </Link>
@@ -112,7 +117,7 @@ export function DashboardNav() {
           className="flex min-h-0 min-w-0 flex-1 items-center justify-center gap-[40px] overflow-x-auto [-webkit-overflow-scrolling:touch] px-4"
           aria-label="Dashboard"
         >
-          <NavItem href="/dashboard" label="Content" active={isContentActive(pathname)} />
+          <NavItem href="/dashboard/content" label="Content" active={isContentActive(pathname)} />
           <NavItem href="/dashboard/magazines" label="Magazines" active={isMagazinesActive(pathname)} />
           <NavItem href="/dashboard/profile" label="Profile" active={isProfileHubActive(pathname)} />
           <NavItem href="/dashboard/schedule" label="Schedule" active={isScheduleActive(pathname)} />
