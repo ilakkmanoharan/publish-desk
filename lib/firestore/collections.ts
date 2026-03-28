@@ -9,6 +9,7 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  deleteField,
   writeBatch,
   serverTimestamp,
   type DocumentData,
@@ -353,17 +354,35 @@ export async function getUserMagazines(userId: string) {
 export async function getUserContentById(
   userId: string,
   contentId: string
-): Promise<{ id: string; categoryId: string; title: string; excerpt?: string; tagIds: string[] } | null> {
+): Promise<{
+  id: string;
+  categoryId: string;
+  title: string;
+  excerpt?: string;
+  tagIds: string[];
+  premiumOnly?: boolean;
+  premiumPriceUsd?: number | null;
+} | null> {
   const ref = doc(db(), COLLECTIONS.content, contentId);
   const snap = await getDoc(ref);
   if (!snap.exists() || snap.data()?.userId !== userId) return null;
   const data = snap.data();
+  const usd = data?.premiumPriceUsd;
+  const legacyCents = data?.premiumPriceCents;
+  let premiumPriceUsd: number | null = null;
+  if (typeof usd === "number" && !Number.isNaN(usd)) {
+    premiumPriceUsd = usd;
+  } else if (typeof legacyCents === "number" && !Number.isNaN(legacyCents)) {
+    premiumPriceUsd = Math.round(legacyCents) / 100;
+  }
   return {
     id: snap.id,
     categoryId: data?.categoryId ?? "",
     title: data?.title ?? "",
     excerpt: data?.excerpt,
     tagIds: (data?.tagIds as string[]) ?? [],
+    premiumOnly: data?.premiumOnly === true,
+    premiumPriceUsd,
   };
 }
 
@@ -454,12 +473,18 @@ export async function updateContent(
     categoryId: string;
     categorySlug: string;
     tagIds: string[];
+    premiumOnly: boolean;
+    premiumPriceUsd: number | null;
   }>
 ) {
-  await updateDoc(doc(db(), COLLECTIONS.content, contentId), {
+  const payload: Record<string, unknown> = {
     ...data,
     updatedAt: serverTimestamp(),
-  });
+  };
+  if (Object.prototype.hasOwnProperty.call(data, "premiumPriceUsd")) {
+    payload.premiumPriceCents = deleteField();
+  }
+  await updateDoc(doc(db(), COLLECTIONS.content, contentId), payload as DocumentData);
 }
 
 export async function upsertPublication(

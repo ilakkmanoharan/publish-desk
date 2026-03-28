@@ -22,8 +22,10 @@ export type Content = {
   /** Denormalized folder slug (sync + new content); used for public Magazine View 2 sections. */
   categorySlug?: string;
   tagIds: string[];
-  /** When true, treat as premium-only (e.g. gate in readers); set via optional `publish_desk` YAML on GitHub sync. */
+  /** When true, treat as premium-only (e.g. gate in readers); set via optional `publish_desk` YAML on GitHub sync or dashboard. */
   premiumOnly?: boolean;
+  /** Optional list price in USD dollars (e.g. 100 = $100, 100.55 = $100.55). Omitted or null when not set. */
+  premiumPriceUsd?: number | null;
   createdAt: { toDate: () => Date };
   updatedAt: { toDate: () => Date };
 };

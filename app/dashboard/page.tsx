@@ -33,9 +33,6 @@ export default function DashboardHomePage() {
             <h2 id="getting-started-heading" className="mt-1 font-display text-2xl font-bold tracking-tight text-[#111827]">
               Getting started
             </h2>
-            <p className="mt-2 max-w-xl font-sans text-sm leading-relaxed text-[#64748B]">
-              Three steps from Markdown on disk to readers—template, magazines, then library and publishing.
-            </p>
           </div>
           <div
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-[#E2E8F0] bg-[#F8FAFC] font-sans text-[10px] font-semibold leading-tight text-[#64748B] text-center"

@@ -34,6 +34,8 @@ export default function ContentDetailPage() {
     category?: { name: string };
     categorySlug?: string;
     tagNames?: string[];
+    premiumOnly?: boolean;
+    premiumPriceUsd?: number | null;
   } | null>(null);
   const [magazines, setMagazines] = useState<{ id: string; name: string; slug: string }[]>([]);
   const [publications, setPublications] = useState<
@@ -65,6 +67,8 @@ export default function ContentDetailPage() {
         category: cat ? { name: cat.name } : undefined,
         categorySlug: cat?.slug,
         tagNames,
+        premiumOnly: c.premiumOnly,
+        premiumPriceUsd: c.premiumPriceUsd ?? null,
       });
     });
     getUserMagazines(user.uid).then(setMagazines);
@@ -104,21 +108,46 @@ export default function ContentDetailPage() {
         contentTagNames={content.tagNames ?? []}
         magazines={magazines}
         existingPublications={publications.map((p) => ({ magazineId: p.magazineId }))}
-        onAssigned={() => {
-          getPublicationsForContent(user.uid, id).then(async (pubs) => {
-            const withMag = await Promise.all(
-              (pubs as { magazineId: string; status: string; scheduledAt?: unknown; publishedAt?: unknown }[]).map(
-                async (p) => {
-                  const mag = await getMagazineById(p.magazineId);
-                  return {
-                    ...p,
-                    magazineName: (mag as { name: string })?.name ?? "",
-                  };
-                }
-              )
+        initialPremiumOnly={content.premiumOnly}
+        initialPremiumPriceUsd={content.premiumPriceUsd ?? null}
+        onAssigned={async () => {
+          const [c, categories, tags] = await Promise.all([
+            getUserContentById(user.uid, id),
+            getUserCategories(user.uid),
+            getUserTags(user.uid),
+          ]);
+          if (c) {
+            const cat = (categories as { id: string; name: string; slug: string }[]).find(
+              (x) => x.id === c.categoryId
             );
-            setPublications(withMag);
-          });
+            const tagNames = (c.tagIds || [])
+              .map((tid) => (tags as { id: string; name: string }[]).find((t) => t.id === tid)?.name)
+              .filter(Boolean) as string[];
+            setContent({
+              categoryId: c.categoryId,
+              title: c.title,
+              excerpt: c.excerpt,
+              tagIds: c.tagIds,
+              category: cat ? { name: cat.name } : undefined,
+              categorySlug: cat?.slug,
+              tagNames,
+              premiumOnly: c.premiumOnly,
+              premiumPriceUsd: c.premiumPriceUsd ?? null,
+            });
+          }
+          const pubs = await getPublicationsForContent(user.uid, id);
+          const withMag = await Promise.all(
+            (pubs as { magazineId: string; status: string; scheduledAt?: unknown; publishedAt?: unknown }[]).map(
+              async (p) => {
+                const mag = await getMagazineById(p.magazineId);
+                return {
+                  ...p,
+                  magazineName: (mag as { name: string })?.name ?? "",
+                };
+              }
+            )
+          );
+          setPublications(withMag);
         }}
       />
       {publications.length > 0 && (
