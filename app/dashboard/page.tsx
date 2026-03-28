@@ -53,11 +53,14 @@ export default function DashboardHomePage() {
                 <p className="mt-1 font-sans text-sm font-semibold text-[#0F172A]">Write content in Markdown</p>
                 <p className="mt-2 font-sans text-sm leading-relaxed text-[#64748B]">
                   Draft articles as <code className="rounded bg-[#F1F5F9] px-1.5 py-0.5 font-mono text-[12px] text-[#334155]">.md</code>{" "}
-                  files. Copy the optional Publish Desk front matter from the template at{" "}
-                  <code className="break-all rounded bg-[#F1F5F9] px-1.5 py-0.5 font-mono text-[11px] text-[#334155] sm:text-[12px]">
-                    private/article-template.md
-                  </code>{" "}
-                  in your project—it covers title, magazines, tags, category, and{" "}
+                  files. Copy the optional Publish Desk front matter from the{" "}
+                  <Link
+                    href="/dashboard/article-template"
+                    className="font-medium text-accent no-underline hover:underline"
+                  >
+                    article template
+                  </Link>
+                  —it covers title, magazines, tags, category, and{" "}
                   <strong className="font-semibold text-[#475569]">Premium</strong> vs{" "}
                   <strong className="font-semibold text-[#475569]">free</strong> via the{" "}
                   <code className="rounded bg-[#F1F5F9] px-1 py-0.5 font-mono text-[11px]">publish_desk</code> block.
