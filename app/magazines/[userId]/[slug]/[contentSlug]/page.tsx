@@ -1,12 +1,15 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
 import { getMagazineByUserIdAndSlug, getPublicationByContentSlug } from "@/lib/firestore/collections";
 import { slugToTitle } from "@/lib/format-title";
+import { buildMarkdownTeaser } from "@/lib/premium-teaser";
 import { ArticleBody } from "./article-body";
 import { ArticleBodyMagazine } from "./article-body-magazine";
+import { PremiumArticleGate, PremiumBadge } from "./premium-article-gate";
 
 function toDate(v: unknown): Date | null {
   if (!v) return null;
@@ -25,10 +28,17 @@ function ArticlePageInner() {
   const layoutMagazine = searchParams.get("layout") === "magazine";
 
   const [magazine, setMagazine] = useState<{ name: string } | null>(null);
-  const [content, setContent] = useState<{ title: string; body: string; excerpt?: string } | null>(null);
+  const [content, setContent] = useState<{
+    title: string;
+    body: string;
+    excerpt?: string;
+    premiumOnly?: boolean;
+    premiumPriceUsd?: number | null;
+  } | null>(null);
   const [displayTitleOverride, setDisplayTitleOverride] = useState<string | null>(null);
   const [publishedAt, setPublishedAt] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     getMagazineByUserIdAndSlug(userId, slug).then(async (m) => {
@@ -50,6 +60,17 @@ function ArticlePageInner() {
       setLoading(false);
     });
   }, [userId, slug, contentSlug]);
+
+  const paywalled = useMemo(() => {
+    if (!content?.premiumOnly) return false;
+    return user?.uid !== userId;
+  }, [content, user?.uid, userId]);
+
+  const bodyToRender = useMemo(() => {
+    if (!content) return "";
+    if (!content.premiumOnly || user?.uid === userId) return content.body;
+    return buildMarkdownTeaser(content.body, 0.2);
+  }, [content, user?.uid, userId]);
 
   if (loading) return <div className="min-h-screen bg-background p-8">Loading...</div>;
   if (!magazine || !content) return <div className="min-h-screen bg-background p-8">Article not found.</div>;
@@ -79,6 +100,11 @@ function ArticlePageInner() {
         </header>
         <article className="mx-auto max-w-4xl px-6 py-12 md:py-16 overflow-x-hidden min-w-0">
           <header className="max-w-3xl mx-auto text-center mb-10 md:mb-14">
+            {paywalled && (
+              <div className="mb-4 flex justify-center">
+                <PremiumBadge />
+              </div>
+            )}
             <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground tracking-tight leading-tight mb-4">
               {displayTitle}
             </h1>
@@ -93,7 +119,17 @@ function ArticlePageInner() {
               {content.excerpt}
             </p>
           )}
-          <ArticleBodyMagazine content={content.body} />
+          {paywalled ? (
+            <PremiumArticleGate
+              magazineName={magazine.name}
+              premiumPriceUsd={content.premiumPriceUsd ?? null}
+              isAuthenticatedReader={Boolean(user)}
+            >
+              <ArticleBodyMagazine content={bodyToRender} />
+            </PremiumArticleGate>
+          ) : (
+            <ArticleBodyMagazine content={bodyToRender} />
+          )}
         </article>
       </div>
     );
@@ -115,6 +151,11 @@ function ArticlePageInner() {
         </div>
       </header>
       <article className="mx-auto max-w-2xl px-6 py-14">
+        {paywalled && (
+          <div className="mb-3">
+            <PremiumBadge />
+          </div>
+        )}
         <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">{displayTitle}</h1>
         {publishedAt && (
           <p className="text-muted text-sm mb-6">
@@ -124,7 +165,17 @@ function ArticlePageInner() {
         {content.excerpt && (
           <p className="text-lg text-muted mb-8">{content.excerpt}</p>
         )}
-        <ArticleBody content={content.body} />
+        {paywalled ? (
+          <PremiumArticleGate
+            magazineName={magazine.name}
+            premiumPriceUsd={content.premiumPriceUsd ?? null}
+            isAuthenticatedReader={Boolean(user)}
+          >
+            <ArticleBody content={bodyToRender} />
+          </PremiumArticleGate>
+        ) : (
+          <ArticleBody content={bodyToRender} />
+        )}
       </article>
     </div>
   );

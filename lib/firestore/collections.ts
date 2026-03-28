@@ -145,6 +145,11 @@ export async function getPublicationByContentSlug(
       title: (contentData?.title as string) ?? "",
       body: (contentData?.body as string) ?? "",
       excerpt: contentData?.excerpt as string | undefined,
+      premiumOnly: contentData?.premiumOnly === true,
+      premiumPriceUsd:
+        typeof contentData?.premiumPriceUsd === "number" && !Number.isNaN(contentData.premiumPriceUsd)
+          ? contentData.premiumPriceUsd
+          : null,
     },
   };
 }
