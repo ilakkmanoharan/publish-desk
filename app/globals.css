@@ -30,6 +30,13 @@ a:hover {
   text-decoration: underline;
 }
 
+/* /apps store CTAs: beat global `a { color: accent }` for readable labels on colored fills */
+a.apps-store-link,
+a.apps-store-link:hover {
+  color: #ffffff;
+  text-decoration: none;
+}
+
 /* Consistent focus ring for accessibility */
 input:focus-visible,
 button:focus-visible,

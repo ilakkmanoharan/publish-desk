@@ -1,5 +1,4 @@
-/** Replace with your real App Store URL when the iOS app is live. */
-const IOS_APP_STORE_URL = "https://apps.apple.com/app/publish-desk/id0000000000";
+import { IOS_APP_STORE_URL } from "@/lib/mobile-app-links";
 
 function SectionTitle({ children }: { children: string }) {
   return (
