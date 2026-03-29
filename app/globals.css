@@ -30,9 +30,11 @@ a:hover {
   text-decoration: underline;
 }
 
-/* /apps store CTAs: beat global `a { color: accent }` for readable labels on colored fills */
+/* Solid CTAs on colored fills: beat global `a { color: accent }` for readable labels */
 a.apps-store-link,
-a.apps-store-link:hover {
+a.apps-store-link:hover,
+a.dashboard-primary-cta,
+a.dashboard-primary-cta:hover {
   color: #ffffff;
   text-decoration: none;
 }

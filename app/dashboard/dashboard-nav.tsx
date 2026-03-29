@@ -33,41 +33,8 @@ function isSourceActive(pathname: string) {
   return pathname.startsWith("/dashboard/source");
 }
 
-function IconBell({ className }: { className?: string }) {
-  return (
-    <svg className={className} width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function IconHelpCircle({ className }: { className?: string }) {
-  return (
-    <svg className={className} width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M12 17h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 const navLinkClass =
   "inline-flex w-fit max-w-none rounded-md px-3 py-2 text-[15px] font-medium leading-none text-[#D1D5DB] whitespace-nowrap no-underline transition-colors duration-200 ease-in-out hover:bg-white/[0.06] hover:text-white hover:no-underline focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-500/50";
-
-const iconHit =
-  "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#9CA3AF] transition-colors duration-200 ease-in-out hover:bg-white/[0.08] hover:text-white focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-500/50";
 
 type NavItemProps = {
   href: string;
@@ -131,12 +98,6 @@ export function DashboardNav() {
           >
             View site
           </Link>
-          <button type="button" className={iconHit} aria-label="Notifications">
-            <IconBell className="shrink-0" />
-          </button>
-          <button type="button" className={iconHit} aria-label="Help">
-            <IconHelpCircle className="shrink-0" />
-          </button>
           <ProfileDropdown
             user={user}
             onSignOut={handleSignOut}
