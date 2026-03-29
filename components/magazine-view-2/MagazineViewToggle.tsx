@@ -10,7 +10,7 @@ type Props = {
 export function MagazineViewToggle({ mode, onChange, magazine2Label }: Props) {
   return (
     <div
-      className="inline-flex rounded-xl border border-border bg-card p-1 text-sm"
+      className="inline-flex gap-1 rounded-full bg-[#f4f4f4] p-1 font-sans text-sm font-medium shadow-inner shadow-black/[0.02]"
       role="tablist"
       aria-label="Magazine layout"
     >
@@ -19,10 +19,10 @@ export function MagazineViewToggle({ mode, onChange, magazine2Label }: Props) {
         role="tab"
         aria-selected={mode === "magazine2"}
         onClick={() => onChange("magazine2")}
-        className={`rounded-lg px-3 py-1.5 font-medium transition-colors ${
+        className={`rounded-full px-3.5 py-1.5 transition-[color,box-shadow,background-color] ${
           mode === "magazine2"
-            ? "bg-foreground text-background"
-            : "text-muted hover:text-foreground"
+            ? "bg-white text-[#111827] shadow-[0_1px_2px_rgba(0,0,0,0.08)]"
+            : "text-[#6B7280] hover:text-[#374151]"
         }`}
       >
         {magazine2Label ?? "Magazines"}
@@ -32,10 +32,10 @@ export function MagazineViewToggle({ mode, onChange, magazine2Label }: Props) {
         role="tab"
         aria-selected={mode === "list"}
         onClick={() => onChange("list")}
-        className={`rounded-lg px-3 py-1.5 font-medium transition-colors ${
+        className={`rounded-full px-3.5 py-1.5 transition-[color,box-shadow,background-color] ${
           mode === "list"
-            ? "bg-foreground text-background"
-            : "text-muted hover:text-foreground"
+            ? "bg-white text-[#111827] shadow-[0_1px_2px_rgba(0,0,0,0.08)]"
+            : "text-[#6B7280] hover:text-[#374151]"
         }`}
       >
         List

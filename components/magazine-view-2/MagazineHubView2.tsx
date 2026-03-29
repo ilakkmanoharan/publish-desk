@@ -9,6 +9,8 @@ type Props = {
   magazines: Magazine[];
   /** Appended to issue URLs (empty when Magazine View 2 is the URL default) */
   openIssueQuery: string;
+  /** Parent already wrapped in `SitePageGutter` (hero + filters live above). */
+  contentOnly?: boolean;
 };
 
 /** Decorative card top — same containment rules as photos (16:9 frame, clip, no flex blowout). */
@@ -28,28 +30,12 @@ function PlaceholderCover({ seed }: { seed: string }) {
   );
 }
 
-export function MagazineHubView2({ magazines, openIssueQuery }: Props) {
+export function MagazineHubView2({ magazines, openIssueQuery, contentOnly }: Props) {
   const [featured, ...rest] = magazines;
 
-  return (
-    <div className="magazine-view-2-hub pb-16">
-      <SitePageGutter>
-        <section className="relative mb-10 flex min-h-[280px] flex-col justify-end overflow-hidden rounded-2xl bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900 text-white shadow-md md:mb-14 md:min-h-[360px]">
-          <div className="px-8 py-10 md:px-12 md:py-12">
-            <div className="mx-auto w-full max-w-3xl">
-              <p className="mb-3 font-sans text-xs uppercase tracking-[0.2em] text-stone-400">Publish Desk</p>
-              <h1 className="mb-4 font-display text-4xl font-bold leading-tight tracking-tight md:text-5xl">
-                Magazines
-              </h1>
-              <p className="max-w-xl font-sans text-lg leading-relaxed text-stone-300">
-                Browse editorial collections—story-driven reading, not just a feed.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <div className="relative isolate min-w-0">
-          <figure className="my-12 rounded-2xl border border-[#E5E7EB] bg-white px-6 py-10 shadow-sm md:my-16 md:px-10">
+  const body = (
+    <div className="relative isolate min-w-0">
+          <figure className="mt-6 mb-12 rounded-2xl border border-[#E5E7EB] bg-white px-6 py-10 shadow-sm md:mt-8 md:mb-16 md:px-10">
             <blockquote className="mx-auto max-w-3xl text-center font-display text-xl italic leading-snug text-[#111827] md:text-2xl">
               Strong hierarchy: headline, intro, body—calm typography that lets the writing lead.
             </blockquote>
@@ -110,8 +96,16 @@ export function MagazineHubView2({ magazines, openIssueQuery }: Props) {
             </ul>
           </section>
         )}
-        </div>
-      </SitePageGutter>
+    </div>
+  );
+
+  if (contentOnly) {
+    return <div className="magazine-view-2-hub min-w-0">{body}</div>;
+  }
+
+  return (
+    <div className="magazine-view-2-hub pb-16">
+      <SitePageGutter>{body}</SitePageGutter>
     </div>
   );
 }

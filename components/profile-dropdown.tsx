@@ -187,7 +187,7 @@ export function ProfileDropdown({
           triggerVariant === "headerIcon" && headerAppearance === "dark"
             ? "relative box-border flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/15 bg-[#171717] p-1.5 transition-colors duration-200 ease-in-out hover:border-white/28 hover:bg-white/[0.07] focus-visible:outline focus-visible:ring-2 focus-visible:ring-accent/45 focus-visible:ring-offset-0 focus-visible:ring-offset-[#0B0B0C]"
             : triggerVariant === "headerIcon"
-              ? "relative flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full transition-colors hover:bg-[#F3F4F6] focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400/50 focus-visible:ring-offset-2"
+              ? "relative box-border flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-white p-1.5 transition-colors hover:border-[#D1D5DB] hover:bg-[#F9FAFB] focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400/50 focus-visible:ring-offset-2"
             : triggerVariant === "pill"
               ? "relative flex h-11 max-w-[220px] shrink-0 items-center gap-2.5 rounded-full border border-border bg-card py-1 pl-1 pr-2.5 text-left shadow-sm transition-colors hover:bg-stone-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2"
               : "relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted transition hover:bg-stone-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2"

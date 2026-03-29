@@ -232,6 +232,13 @@ a:focus-visible {
   column-gap: 1.25rem; /* 20px */
 }
 
+/* Public home header: Dashboard ↔ avatar (16px; survives flex min-width quirks) */
+header.site-header .right-section {
+  display: flex;
+  align-items: center;
+  column-gap: 1rem; /* 16px */
+}
+
 /* High-res PNG (e.g. 1024²): intrinsic width must not expand flex parents */
 .profile-dropdown-panel img[src="/private/user-icon.png"],
 button[aria-label="Open account menu"] img[src="/private/user-icon.png"] {
@@ -242,10 +249,16 @@ button[aria-label="Open account menu"] img[src="/private/user-icon.png"] {
   object-fit: contain;
 }
 
-/* Dark dashboard header: 40px trigger with border + p-1 */
+/* Dark dashboard header */
 .dashboard-header-premium button[aria-label="Open account menu"] img[src="/private/user-icon.png"] {
   max-width: 28px;
   max-height: 28px;
+}
+
+/* Light site header: 36px trigger */
+header.site-header button[aria-label="Open account menu"] img[src="/private/user-icon.png"] {
+  max-width: 26px;
+  max-height: 26px;
 }
 
 /* Profile hero: larger generic avatar than header; still cap high-res PNG */
