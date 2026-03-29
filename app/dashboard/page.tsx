@@ -141,7 +141,7 @@ export default function DashboardHomePage() {
         </li>
         <li>
           <Link href="/dashboard/source" className={`${linkCardClass} block no-underline`}>
-            <span className="font-sans text-base font-semibold text-[#111827] group-hover:text-accent">Content source</span>
+            <span className="font-sans text-base font-semibold text-[#111827] group-hover:text-accent">Sources</span>
             <p className="mt-2 font-sans text-sm leading-relaxed text-[#64748B]">GitHub sync and repo settings.</p>
           </Link>
         </li>

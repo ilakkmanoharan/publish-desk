@@ -201,11 +201,35 @@ a:focus-visible {
   text-decoration: none;
 }
 
-/* Dashboard nav: one flex child per item, no collapsing */
+/* Dashboard nav: keep each label’s intrinsic width — min-width:0 caused overlap (“ContentMagazines…”) */
 .dashboard-header-premium .nav-item {
   flex-shrink: 0;
-  width: fit-content;
-  min-width: 0;
+  width: max-content;
+  min-width: max-content;
+}
+
+/* Explicit column gap so spacing survives odd flex/min-width interactions */
+.dashboard-header-premium nav.nav-menu {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  column-gap: 2rem;
+  row-gap: 0;
+}
+
+@media (min-width: 768px) {
+  .dashboard-header-premium nav.nav-menu {
+    column-gap: 2.5rem;
+  }
+}
+
+/* Right utilities: clear separation View Site ↔ avatar */
+.dashboard-header-premium .right-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  column-gap: 1.25rem; /* 20px */
 }
 
 /* High-res PNG (e.g. 1024²): intrinsic width must not expand flex parents */

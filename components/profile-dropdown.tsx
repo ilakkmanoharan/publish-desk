@@ -185,7 +185,7 @@ export function ProfileDropdown({
         onClick={() => setOpen((v) => !v)}
         className={
           triggerVariant === "headerIcon" && headerAppearance === "dark"
-            ? "relative box-border flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-white/20 bg-[#1F2937] p-1 transition-all duration-200 ease-in-out hover:border-white/90 hover:shadow-[0_0_0_4px_rgba(255,255,255,0.06)] focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400/70 focus-visible:ring-offset-0 focus-visible:ring-offset-[#0B0B0C]"
+            ? "relative box-border flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/15 bg-[#171717] p-1.5 transition-colors duration-200 ease-in-out hover:border-white/28 hover:bg-white/[0.07] focus-visible:outline focus-visible:ring-2 focus-visible:ring-accent/45 focus-visible:ring-offset-0 focus-visible:ring-offset-[#0B0B0C]"
             : triggerVariant === "headerIcon"
               ? "relative flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full transition-colors hover:bg-[#F3F4F6] focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400/50 focus-visible:ring-offset-2"
             : triggerVariant === "pill"
@@ -200,9 +200,9 @@ export function ProfileDropdown({
             <img
               src="/private/user-icon.png"
               alt=""
-              className="max-h-full max-w-full object-contain"
-              width={28}
-              height={28}
+              className="max-h-full max-w-full object-contain opacity-95"
+              width={26}
+              height={26}
               decoding="async"
             />
             {headerAppearance === "default" ? (
@@ -290,7 +290,7 @@ export function ProfileDropdown({
             </Link>
             <Link href="/dashboard/account" role="menuitem" className={itemClass} onClick={close}>
               <IconSettings className="shrink-0 text-[#9CA3AF]" />
-              Account Settings
+              Account settings
             </Link>
             <Link href="/dashboard/billing" role="menuitem" className={itemClass} onClick={close}>
               <IconCard className="shrink-0 text-[#9CA3AF]" />
