@@ -1,7 +1,14 @@
 ---
-# Optional Publish Desk block for GitHub sync — see the in-app Article template page in the dashboard.
+# Optional Publish Desk block for GitHub sync — this file lives at docs/article-template.md (committed to git).
+# Copy from Dashboard → Article template or /api/article-template; remove this fence for default sync behavior.
 
 publish_desk_active: true
+
+# Optional — editorial metadata in the repo (GitHub sync does not map these into Firestore yet; keep for your workflow / tooling).
+author: "Your Name"
+status: "published" # e.g. draft | published — informational in the file only today
+createdAt: "2026-03-29"
+updatedAt: "2026-03-29"
 
 publish_desk:
   # Display title
@@ -33,4 +40,10 @@ title/slug.
 **When `publish_desk_active` is true:** include the `publish_desk` mapping above.
 Sync applies `title`, `slug`, `excerpt`, `category`, `tags`, `premium`, and
 creates **Published** placements in each listed magazine (magazine slugs must
-already exist).
+already exist). Content `createdAt` / `updatedAt` in the database are set by the
+sync run, not from YAML.
+
+**Root-level fields** (`author`, `status`, `createdAt`, `updatedAt`) are optional
+and documented here for a consistent editorial template; they are **ignored by
+current GitHub sync** and remain available for humans, scripts, or future
+product support.
