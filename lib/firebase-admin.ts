@@ -1,27 +1,54 @@
 import { readFileSync } from "fs";
+import { isAbsolute, join } from "path";
 import { getApps, initializeApp, cert, type ServiceAccount } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 
+function devLog(...args: unknown[]) {
+  if (process.env.NODE_ENV === "development") {
+    console.error("[firebase-admin]", ...args);
+  }
+}
+
 function getCredential() {
-  const json = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-  if (json) {
+  const jsonRaw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim();
+  if (jsonRaw) {
     try {
-      return cert(JSON.parse(json) as ServiceAccount);
-    } catch {
-      return undefined;
+      return cert(JSON.parse(jsonRaw) as ServiceAccount);
+    } catch (e) {
+      devLog(
+        "FIREBASE_SERVICE_ACCOUNT_JSON is set but invalid JSON — fix it or remove the var so FIREBASE_SERVICE_ACCOUNT_PATH can be used.",
+        e
+      );
     }
   }
-  const path = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
-  if (path) {
+
+  const filePath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH?.trim();
+  if (filePath) {
     try {
-      const raw = readFileSync(path, "utf-8");
+      const resolved = isAbsolute(filePath) ? filePath : join(process.cwd(), filePath);
+      const raw = readFileSync(resolved, "utf-8");
       return cert(JSON.parse(raw) as ServiceAccount);
-    } catch {
-      return undefined;
+    } catch (e) {
+      devLog(
+        `Could not load service account from FIREBASE_SERVICE_ACCOUNT_PATH (resolved: ${resolvedPathForLog(filePath)}).`,
+        e
+      );
     }
+  } else {
+    devLog(
+      "Neither FIREBASE_SERVICE_ACCOUNT_JSON nor FIREBASE_SERVICE_ACCOUNT_PATH is set in the environment (e.g. .env). The JSON file can exist on disk, but Next.js only loads credentials from env vars."
+    );
   }
   return undefined;
+}
+
+function resolvedPathForLog(filePath: string): string {
+  try {
+    return isAbsolute(filePath) ? filePath : join(process.cwd(), filePath);
+  } catch {
+    return filePath;
+  }
 }
 
 export function getAdminApp() {
