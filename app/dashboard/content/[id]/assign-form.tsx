@@ -176,16 +176,13 @@ export function AssignForm({
     ? "Saving..."
     : assignAction
       ? "Assign"
-      : "Save access & pricing";
+      : "Save";
 
   const savedAccessTier = initialPremiumOnly ? "premium" : "free";
   const savedPriceStr = dollarsToInput(initialPremiumPriceUsd ?? null);
   const accessPricingDirty =
     accessTier !== savedAccessTier ||
     normalizedPriceKey(priceUsd) !== normalizedPriceKey(savedPriceStr);
-
-  const saveOnlyButtonDisabled =
-    !assignAction && (!accessPricingDirty || submitting);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -331,7 +328,7 @@ export function AssignForm({
 
       <button
         type="submit"
-        disabled={assignAction ? submitting : saveOnlyButtonDisabled}
+        disabled={submitting}
         className="min-h-12 rounded-xl border-2 border-transparent bg-accent px-8 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:border-slate-400 disabled:bg-slate-200 disabled:text-slate-900 disabled:opacity-100 disabled:shadow-none dark:disabled:border-zinc-500 dark:disabled:bg-zinc-700 dark:disabled:text-zinc-50"
       >
         {buttonLabel}
