@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import matter from "gray-matter";
 import { FieldValue, type Firestore } from "firebase-admin/firestore";
+import path from "path";
 import { getAdminApp, getAdminAuth, getAdminFirestore } from "@/lib/firebase-admin";
 import {
   deskPremiumOnly,
@@ -13,6 +14,38 @@ import {
 const GITHUB_API = "https://api.github.com";
 
 type GitHubTreeItem = { path: string; type: string; sha: string };
+
+function rewriteRelativeMarkdownImageUrls(opts: {
+  markdown: string;
+  rawBaseUrl: string; // https://raw.githubusercontent.com/<owner>/<repo>/<branch>
+  filePathInRepo: string; // e.g. planet-impossible/issue1/issue-1.md
+}): string {
+  const { markdown, rawBaseUrl, filePathInRepo } = opts;
+  const baseDir = filePathInRepo.split("/").slice(0, -1).join("/");
+
+  // Match Markdown images: ![alt](url) including optional <...> wrapping.
+  // We only rewrite relative paths (./, ../, or bare filenames).
+  return markdown.replace(/!\[([^\]]*)\]\(([^)\r\n]+)\)/g, (full, alt, rawUrl) => {
+    const trimmed = String(rawUrl).trim().replace(/^<|>$/g, "").replace(/^"(.*)"$/g, "$1").replace(/^'(.*)'$/g, "$1");
+
+    // Leave absolute / special URLs untouched.
+    if (/^(https?:)?\/\//i.test(trimmed) || /^data:/i.test(trimmed) || /^mailto:/i.test(trimmed)) return full;
+
+    // Skip in-page anchors.
+    if (trimmed.startsWith("#")) return full;
+
+    // Only handle relative (including "./", "../") and bare file names.
+    const joined = baseDir
+      ? path.posix.normalize(path.posix.join(baseDir, trimmed))
+      : path.posix.normalize(trimmed);
+
+    // Guard: normalize can yield paths like "../x" — don't allow escape above repo root.
+    if (joined.startsWith("..")) return full;
+
+    const absolute = `${rawBaseUrl}/${joined}`;
+    return `![${alt}](${absolute})`;
+  });
+}
 
 function parseRepoUrl(url: string): { owner: string; repo: string } | null {
   const trimmed = url.trim().replace(/\.git$/, "");
@@ -225,6 +258,12 @@ export async function POST(request: Request) {
       const deskActive = isPublishDeskFrontMatterActive(fm);
       const desk = deskActive ? getPublishDeskBlock(fm) : null;
       const useDesk = Boolean(desk);
+      const rawBaseUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${defaultBranch}`;
+      const rewrittenBody = rewriteRelativeMarkdownImageUrls({
+        markdown: body,
+        rawBaseUrl,
+        filePathInRepo: path,
+      });
 
       let title =
         (useDesk && typeof desk!.title === "string" && desk!.title.trim()) ||
@@ -311,7 +350,7 @@ export async function POST(request: Request) {
         userId: uid,
         title,
         slug,
-        body: body.trim(),
+        body: rewrittenBody.trim(),
         excerpt: excerpt || null,
         categoryId,
         categorySlug,

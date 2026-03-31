@@ -68,7 +68,6 @@ export function AssignForm({
   const [priceError, setPriceError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [savedFlash, setSavedFlash] = useState(false);
   const savedFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -83,17 +82,7 @@ export function AssignForm({
     []
   );
 
-  function showSavedFlash() {
-    setSavedFlash(true);
-    if (savedFlashTimerRef.current) clearTimeout(savedFlashTimerRef.current);
-    savedFlashTimerRef.current = setTimeout(() => {
-      setSavedFlash(false);
-      savedFlashTimerRef.current = null;
-    }, 4000);
-  }
-
   function clearSavedFlash() {
-    setSavedFlash(false);
     if (savedFlashTimerRef.current) {
       clearTimeout(savedFlashTimerRef.current);
       savedFlashTimerRef.current = null;
@@ -142,7 +131,6 @@ export function AssignForm({
 
       if (!magazineId.trim()) {
         await onAssigned();
-        showSavedFlash();
         return;
       }
 
@@ -162,7 +150,6 @@ export function AssignForm({
         await addMagazineSlugsForPublish(magazineId, contentCategorySlug, contentTagNames);
       }
       await onAssigned();
-      showSavedFlash();
       setDisplayTitle("");
       setMagazineId("");
     } finally {
@@ -315,16 +302,6 @@ export function AssignForm({
       </div>
 
       {formError && <p className="text-sm text-red-600">{formError}</p>}
-
-      {savedFlash && (
-        <p
-          className="text-sm font-medium text-emerald-700 dark:text-emerald-400"
-          role="status"
-          aria-live="polite"
-        >
-          Access and pricing saved.
-        </p>
-      )}
 
       <button
         type="submit"
