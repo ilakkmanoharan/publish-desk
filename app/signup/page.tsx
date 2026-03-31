@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { getFirebaseAuthUserMessage } from "@/lib/firebase/auth-user-message";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function SignupPage() {
       router.push("/dashboard");
       router.refresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Sign up failed");
+      setError(getFirebaseAuthUserMessage(err));
     } finally {
       setLoading(false);
     }
@@ -36,7 +37,7 @@ export default function SignupPage() {
       router.push("/dashboard");
       router.refresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Sign up failed");
+      setError(getFirebaseAuthUserMessage(err));
     } finally {
       setLoading(false);
     }
