@@ -17,10 +17,10 @@ type GitHubTreeItem = { path: string; type: string; sha: string };
 
 function rewriteRelativeMarkdownImageUrls(opts: {
   markdown: string;
-  rawBaseUrl: string; // https://raw.githubusercontent.com/<owner>/<repo>/<branch>
+  assetBaseUrl: string; // e.g. https://cdn.jsdelivr.net/gh/<owner>/<repo>@<sha>
   filePathInRepo: string; // e.g. planet-impossible/issue1/issue-1.md
 }): { markdown: string; rewrittenCount: number; samples: Array<{ from: string; to: string }> } {
-  const { markdown, rawBaseUrl, filePathInRepo } = opts;
+  const { markdown, assetBaseUrl, filePathInRepo } = opts;
   const baseDir = filePathInRepo.split("/").slice(0, -1).join("/");
   let rewrittenCount = 0;
   const samples: Array<{ from: string; to: string }> = [];
@@ -44,7 +44,7 @@ function rewriteRelativeMarkdownImageUrls(opts: {
     // Guard: normalize can yield paths like "../x" — don't allow escape above repo root.
     if (joined.startsWith("..")) return full;
 
-    const absolute = `${rawBaseUrl}/${joined}`;
+    const absolute = `${assetBaseUrl}/${joined}`;
     const from = `![${alt}](${trimmed})`;
     const to = `![${alt}](${absolute})`;
     rewrittenCount += 1;
@@ -267,10 +267,11 @@ export async function POST(request: Request) {
       const deskActive = isPublishDeskFrontMatterActive(fm);
       const desk = deskActive ? getPublishDeskBlock(fm) : null;
       const useDesk = Boolean(desk);
-      const rawBaseUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${defaultBranch}`;
+      // Use an immutable, cached CDN URL pinned to commit SHA so images load reliably.
+      const assetBaseUrl = `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${commitSha}`;
       const rewrite = rewriteRelativeMarkdownImageUrls({
         markdown: body,
-        rawBaseUrl,
+        assetBaseUrl,
         filePathInRepo: path,
       });
       markdownImagesRewritten += rewrite.rewrittenCount;
