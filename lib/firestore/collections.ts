@@ -134,6 +134,8 @@ export async function getPublicationByContentSlug(
   const pub = pubSnap.docs[0];
   const pubData = pub.data();
   const contentData = contentSnap.docs[0].data();
+  const readerLayout: "magazine" | "comic" =
+    contentData?.readerLayout === "comic" ? "comic" : "magazine";
   return {
     publication: {
       id: pub.id,
@@ -150,6 +152,7 @@ export async function getPublicationByContentSlug(
         typeof contentData?.premiumPriceUsd === "number" && !Number.isNaN(contentData.premiumPriceUsd)
           ? contentData.premiumPriceUsd
           : null,
+      readerLayout,
     },
   };
 }
@@ -367,6 +370,7 @@ export async function getUserContentById(
   tagIds: string[];
   premiumOnly?: boolean;
   premiumPriceUsd?: number | null;
+  readerLayout?: "magazine" | "comic";
 } | null> {
   const ref = doc(db(), COLLECTIONS.content, contentId);
   const snap = await getDoc(ref);
@@ -380,6 +384,8 @@ export async function getUserContentById(
   } else if (typeof legacyCents === "number" && !Number.isNaN(legacyCents)) {
     premiumPriceUsd = Math.round(legacyCents) / 100;
   }
+  const readerLayout: "magazine" | "comic" =
+    data?.readerLayout === "comic" ? "comic" : "magazine";
   return {
     id: snap.id,
     categoryId: data?.categoryId ?? "",
@@ -388,6 +394,7 @@ export async function getUserContentById(
     tagIds: (data?.tagIds as string[]) ?? [],
     premiumOnly: data?.premiumOnly === true,
     premiumPriceUsd,
+    readerLayout,
   };
 }
 
@@ -480,6 +487,7 @@ export async function updateContent(
     tagIds: string[];
     premiumOnly: boolean;
     premiumPriceUsd: number | null;
+    readerLayout: "magazine" | "comic";
   }>
 ) {
   const payload: Record<string, unknown> = {

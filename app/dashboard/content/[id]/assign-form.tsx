@@ -46,6 +46,7 @@ export function AssignForm({
   existingPublications,
   initialPremiumOnly,
   initialPremiumPriceUsd,
+  initialReaderLayout,
   onAssigned,
 }: {
   userId: string;
@@ -57,6 +58,8 @@ export function AssignForm({
   existingPublications: { magazineId: string }[];
   initialPremiumOnly?: boolean;
   initialPremiumPriceUsd?: number | null;
+  /** Public article layout: magazine (default) or comic (numbered panels). */
+  initialReaderLayout?: "magazine" | "comic";
   onAssigned: () => void;
 }) {
   const [magazineId, setMagazineId] = useState("");
@@ -65,6 +68,9 @@ export function AssignForm({
   const [scheduledAt, setScheduledAt] = useState("");
   const [accessTier, setAccessTier] = useState<"free" | "premium">("free");
   const [priceUsd, setPriceUsd] = useState("");
+  const [readerLayout, setReaderLayout] = useState<"magazine" | "comic">(
+    initialReaderLayout === "comic" ? "comic" : "magazine"
+  );
   const [priceError, setPriceError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -74,6 +80,10 @@ export function AssignForm({
     setAccessTier(initialPremiumOnly ? "premium" : "free");
     setPriceUsd(dollarsToInput(initialPremiumPriceUsd ?? null));
   }, [initialPremiumOnly, initialPremiumPriceUsd]);
+
+  useEffect(() => {
+    setReaderLayout(initialReaderLayout === "comic" ? "comic" : "magazine");
+  }, [initialReaderLayout]);
 
   useEffect(
     () => () => {
@@ -112,6 +122,7 @@ export function AssignForm({
     await updateContent(contentId, {
       premiumOnly,
       premiumPriceUsd: premiumOnly ? premiumPriceUsd : null,
+      readerLayout,
     });
     return true;
   }
@@ -269,6 +280,21 @@ export function AssignForm({
         </select>
         <p className="text-xs text-muted mt-1">
           {`Premium marks the article as paid content for your readers. List price is optional (USD, stored as dollars—e.g. 100 = $100, 100.55 = $100.55; max $${MAX_PRICE_USD.toLocaleString()}).`}
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-foreground mb-1">Article layout</label>
+        <select
+          value={readerLayout}
+          onChange={(e) => setReaderLayout(e.target.value as "magazine" | "comic")}
+          className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-shadow"
+        >
+          <option value="magazine">Magazine (default) — multi-column reading</option>
+          <option value="comic">Comic book — one column, numbered panels in order</option>
+        </select>
+        <p className="text-xs text-muted mt-1">
+          Comic layout shows each image as a numbered panel (Panel 1, 2, …) in top-to-bottom reading order with page-like side margins.
         </p>
       </div>
 

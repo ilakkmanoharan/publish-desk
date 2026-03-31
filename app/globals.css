@@ -171,6 +171,43 @@ a:focus-visible {
   height: auto;
 }
 
+/* Comic book reader: one column, numbered panels, clear borders (margins on article wrapper) */
+.comic-reading-body > * {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.comic-panel-frame {
+  border: 2px solid #111827;
+  border-radius: 2px;
+  background: #fafafa;
+}
+
+.comic-reading-body .magazine-image {
+  display: block;
+  vertical-align: middle;
+}
+
+.comic-reading-body blockquote {
+  margin: 2rem 0;
+  padding: 1.5rem 1.75rem;
+  border-left: 3px solid var(--accent);
+  border-right: 1px solid var(--border);
+  font-family: var(--font-playfair), Georgia, serif;
+  font-style: italic;
+  font-size: 1.25rem;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--foreground);
+  background: rgb(180 83 9 / 0.06);
+  border-radius: 0.5rem;
+}
+
+.comic-reading-body blockquote p {
+  margin: 0;
+}
+
 .magazine-view-2-hub .magazine-grid-item,
 .magazine-view-2-issue .magazine-grid-item {
   min-width: 0;

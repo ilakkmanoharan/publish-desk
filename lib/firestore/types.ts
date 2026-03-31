@@ -26,6 +26,8 @@ export type Content = {
   premiumOnly?: boolean;
   /** Optional list price in USD dollars (e.g. 100 = $100, 100.55 = $100.55). Omitted or null when not set. */
   premiumPriceUsd?: number | null;
+  /** Public reader layout for this article. `magazine` = default multi-column issue style; `comic` = single column with numbered panels. */
+  readerLayout?: "magazine" | "comic";
   createdAt: { toDate: () => Date };
   updatedAt: { toDate: () => Date };
 };

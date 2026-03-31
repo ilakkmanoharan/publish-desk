@@ -8,6 +8,7 @@ import { getMagazineByUserIdAndSlug, getPublicationByContentSlug } from "@/lib/f
 import { slugToTitle } from "@/lib/format-title";
 import { buildMarkdownTeaser } from "@/lib/premium-teaser";
 import { ArticleBody } from "./article-body";
+import { ArticleBodyComic } from "./article-body-comic";
 import { ArticleBodyMagazine } from "./article-body-magazine";
 import { PremiumArticleGate, PremiumBadge } from "./premium-article-gate";
 
@@ -34,6 +35,7 @@ function ArticlePageInner() {
     excerpt?: string;
     premiumOnly?: boolean;
     premiumPriceUsd?: number | null;
+    readerLayout?: "magazine" | "comic";
   } | null>(null);
   const [displayTitleOverride, setDisplayTitleOverride] = useState<string | null>(null);
   const [publishedAt, setPublishedAt] = useState<Date | null>(null);
@@ -72,6 +74,20 @@ function ArticlePageInner() {
     return buildMarkdownTeaser(content.body, 0.2);
   }, [content, user?.uid, userId]);
 
+  const isComicLayout = content?.readerLayout === "comic";
+
+  const ArticleBodyVariant = isComicLayout
+    ? ArticleBodyComic
+    : layoutMagazine
+      ? ArticleBodyMagazine
+      : ArticleBody;
+
+  const articleGutterClass = isComicLayout
+    ? "mx-auto w-full max-w-3xl px-6 sm:px-12 md:px-16 lg:px-24 py-12 md:py-16 overflow-x-hidden min-w-0"
+    : layoutMagazine
+      ? "mx-auto max-w-4xl px-6 py-12 md:py-16 overflow-x-hidden min-w-0"
+      : "mx-auto max-w-2xl px-6 py-14";
+
   if (loading) return <div className="min-h-screen bg-background p-8">Loading...</div>;
   if (!magazine || !content) return <div className="min-h-screen bg-background p-8">Article not found.</div>;
 
@@ -98,7 +114,7 @@ function ArticlePageInner() {
             </Link>
           </div>
         </header>
-        <article className="mx-auto max-w-4xl px-6 py-12 md:py-16 overflow-x-hidden min-w-0">
+        <article className={articleGutterClass}>
           <header className="max-w-3xl mx-auto text-center mb-10 md:mb-14">
             {paywalled && (
               <div className="mb-4 flex justify-center">
@@ -125,10 +141,10 @@ function ArticlePageInner() {
               premiumPriceUsd={content.premiumPriceUsd ?? null}
               isAuthenticatedReader={Boolean(user)}
             >
-              <ArticleBodyMagazine content={bodyToRender} />
+              <ArticleBodyVariant content={bodyToRender} />
             </PremiumArticleGate>
           ) : (
-            <ArticleBodyMagazine content={bodyToRender} />
+            <ArticleBodyVariant content={bodyToRender} />
           )}
         </article>
       </div>
@@ -150,7 +166,7 @@ function ArticlePageInner() {
           </Link>
         </div>
       </header>
-      <article className="mx-auto max-w-2xl px-6 py-14">
+      <article className={articleGutterClass}>
         {paywalled && (
           <div className="mb-3">
             <PremiumBadge />
@@ -171,10 +187,10 @@ function ArticlePageInner() {
             premiumPriceUsd={content.premiumPriceUsd ?? null}
             isAuthenticatedReader={Boolean(user)}
           >
-            <ArticleBody content={bodyToRender} />
+            <ArticleBodyVariant content={bodyToRender} />
           </PremiumArticleGate>
         ) : (
-          <ArticleBody content={bodyToRender} />
+          <ArticleBodyVariant content={bodyToRender} />
         )}
       </article>
     </div>

@@ -36,6 +36,7 @@ export default function ContentDetailPage() {
     tagNames?: string[];
     premiumOnly?: boolean;
     premiumPriceUsd?: number | null;
+    readerLayout?: "magazine" | "comic";
   } | null>(null);
   const [magazines, setMagazines] = useState<{ id: string; name: string; slug: string }[]>([]);
   const [publications, setPublications] = useState<
@@ -110,6 +111,7 @@ export default function ContentDetailPage() {
         existingPublications={publications.map((p) => ({ magazineId: p.magazineId }))}
         initialPremiumOnly={content.premiumOnly}
         initialPremiumPriceUsd={content.premiumPriceUsd ?? null}
+        initialReaderLayout={content.readerLayout}
         onAssigned={async () => {
           const [c, categories, tags] = await Promise.all([
             getUserContentById(user.uid, id),
@@ -133,6 +135,7 @@ export default function ContentDetailPage() {
               tagNames,
               premiumOnly: c.premiumOnly,
               premiumPriceUsd: c.premiumPriceUsd ?? null,
+              readerLayout: c.readerLayout,
             });
           }
           const pubs = await getPublicationsForContent(user.uid, id);
