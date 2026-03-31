@@ -114,7 +114,12 @@ export function ProfileSourceTab({ userId }: { userId: string }) {
               </label>
               <input
                 id="profile-repo-url"
+                name="github-repository-url"
                 type="url"
+                inputMode="url"
+                autoComplete="url"
+                data-1p-ignore
+                data-lpignore="true"
                 value={repoUrl}
                 onChange={(e) => setRepoUrl(e.target.value)}
                 placeholder="https://github.com/username/repo"

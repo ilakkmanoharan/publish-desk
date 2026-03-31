@@ -112,11 +112,17 @@ export default function SourcePage() {
       ) : (
         <div className="rounded-2xl bg-card border border-border shadow-md p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
+            <label htmlFor="dashboard-github-repo-url" className="block text-sm font-medium text-foreground mb-1">
               GitHub repository URL
             </label>
             <input
+              id="dashboard-github-repo-url"
+              name="github-repository-url"
               type="url"
+              inputMode="url"
+              autoComplete="url"
+              data-1p-ignore
+              data-lpignore="true"
               value={repoUrl}
               onChange={(e) => setRepoUrl(e.target.value)}
               placeholder="https://github.com/username/repo"
