@@ -19,13 +19,15 @@ function rewriteRelativeMarkdownImageUrls(opts: {
   markdown: string;
   rawBaseUrl: string; // https://raw.githubusercontent.com/<owner>/<repo>/<branch>
   filePathInRepo: string; // e.g. planet-impossible/issue1/issue-1.md
-}): string {
+}): { markdown: string; rewrittenCount: number; samples: Array<{ from: string; to: string }> } {
   const { markdown, rawBaseUrl, filePathInRepo } = opts;
   const baseDir = filePathInRepo.split("/").slice(0, -1).join("/");
+  let rewrittenCount = 0;
+  const samples: Array<{ from: string; to: string }> = [];
 
   // Match Markdown images: ![alt](url) including optional <...> wrapping.
   // We only rewrite relative paths (./, ../, or bare filenames).
-  return markdown.replace(/!\[([^\]]*)\]\(([^)\r\n]+)\)/g, (full, alt, rawUrl) => {
+  const next = markdown.replace(/!\[([^\]]*)\]\(([^)\r\n]+)\)/g, (full, alt, rawUrl) => {
     const trimmed = String(rawUrl).trim().replace(/^<|>$/g, "").replace(/^"(.*)"$/g, "$1").replace(/^'(.*)'$/g, "$1");
 
     // Leave absolute / special URLs untouched.
@@ -43,8 +45,13 @@ function rewriteRelativeMarkdownImageUrls(opts: {
     if (joined.startsWith("..")) return full;
 
     const absolute = `${rawBaseUrl}/${joined}`;
-    return `![${alt}](${absolute})`;
+    const from = `![${alt}](${trimmed})`;
+    const to = `![${alt}](${absolute})`;
+    rewrittenCount += 1;
+    if (samples.length < 6) samples.push({ from, to });
+    return to;
   });
+  return { markdown: next, rewrittenCount, samples };
 }
 
 function parseRepoUrl(url: string): { owner: string; repo: string } | null {
@@ -232,6 +239,8 @@ export async function POST(request: Request) {
     let categoriesCreated = 0;
     let contentUpserted = 0;
     let publicationsLinked = 0;
+    let markdownImagesRewritten = 0;
+    const markdownImageRewriteSamples: Array<{ path: string; from: string; to: string }> = [];
     const magazineSlugMisses: string[] = [];
 
     for (const item of mdPaths) {
@@ -259,11 +268,16 @@ export async function POST(request: Request) {
       const desk = deskActive ? getPublishDeskBlock(fm) : null;
       const useDesk = Boolean(desk);
       const rawBaseUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${defaultBranch}`;
-      const rewrittenBody = rewriteRelativeMarkdownImageUrls({
+      const rewrite = rewriteRelativeMarkdownImageUrls({
         markdown: body,
         rawBaseUrl,
         filePathInRepo: path,
       });
+      markdownImagesRewritten += rewrite.rewrittenCount;
+      for (const s of rewrite.samples) {
+        if (markdownImageRewriteSamples.length >= 8) break;
+        markdownImageRewriteSamples.push({ path, from: s.from, to: s.to });
+      }
 
       let title =
         (useDesk && typeof desk!.title === "string" && desk!.title.trim()) ||
@@ -350,7 +364,7 @@ export async function POST(request: Request) {
         userId: uid,
         title,
         slug,
-        body: rewrittenBody.trim(),
+        body: rewrite.markdown.trim(),
         excerpt: excerpt || null,
         categoryId,
         categorySlug,
@@ -406,6 +420,8 @@ export async function POST(request: Request) {
       ok: true,
       categoriesCreated,
       contentUpserted,
+      markdownImagesRewritten,
+      markdownImageRewriteSamples: markdownImageRewriteSamples.length ? markdownImageRewriteSamples : undefined,
       filesScanned: mdPaths.length,
       publicationsLinked,
       magazineSlugMisses: magazineSlugMisses.length ? magazineSlugMisses : undefined,
