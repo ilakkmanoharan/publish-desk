@@ -10,6 +10,7 @@ import { buildMarkdownTeaser } from "@/lib/premium-teaser";
 import { ArticleBody } from "./article-body";
 import { ArticleBodyComic } from "./article-body-comic";
 import { ArticleBodyMagazine } from "./article-body-magazine";
+import { ArticleShareMenu } from "@/components/article-share-menu";
 import { PremiumArticleGate, PremiumBadge } from "./premium-article-gate";
 
 function toDate(v: unknown): Date | null {
@@ -129,6 +130,9 @@ function ArticlePageInner() {
                 {publishedAt.toLocaleDateString()} · {magazine.name}
               </p>
             )}
+            <div className="mt-5 flex justify-center">
+              <ArticleShareMenu title={displayTitle} variant="magazine" />
+            </div>
           </header>
           {content.excerpt && (
             <p className="font-sans text-lg md:text-xl text-muted leading-relaxed max-w-3xl mx-auto mb-10 md:mb-12 text-center">
@@ -173,11 +177,14 @@ function ArticlePageInner() {
           </div>
         )}
         <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">{displayTitle}</h1>
-        {publishedAt && (
-          <p className="text-muted text-sm mb-6">
-            {publishedAt.toLocaleDateString()} · {magazine.name}
-          </p>
-        )}
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          {publishedAt ? (
+            <p className="text-muted text-sm">
+              {publishedAt.toLocaleDateString()} · {magazine.name}
+            </p>
+          ) : null}
+          <ArticleShareMenu title={displayTitle} variant="default" />
+        </div>
         {content.excerpt && (
           <p className="text-lg text-muted mb-8">{content.excerpt}</p>
         )}
