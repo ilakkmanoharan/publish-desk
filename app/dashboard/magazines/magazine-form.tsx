@@ -39,10 +39,11 @@ export function MagazineForm({
     setSuccess(null);
     try {
       const savedName = name.trim();
+      const desc = description.trim();
       await createMagazine(userId, {
         name: savedName,
         slug: (slug || slugify(name)).trim(),
-        description: description.trim() || undefined,
+        ...(desc ? { description: desc } : {}),
       });
       setName("");
       setSlug("");
