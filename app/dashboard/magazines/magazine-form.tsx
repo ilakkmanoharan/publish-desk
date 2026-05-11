@@ -23,6 +23,8 @@ export function MagazineForm({
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   function onNameChange(value: string) {
     setName(value);
@@ -33,23 +35,34 @@ export function MagazineForm({
     e.preventDefault();
     if (!name.trim()) return;
     setSubmitting(true);
+    setError(null);
+    setSuccess(null);
     try {
+      const savedName = name.trim();
       await createMagazine(userId, {
-        name: name.trim(),
+        name: savedName,
         slug: (slug || slugify(name)).trim(),
         description: description.trim() || undefined,
       });
       setName("");
       setSlug("");
       setDescription("");
+      setSuccess(`"${savedName}" created successfully.`);
       onAdded();
+    } catch (err: unknown) {
+      console.error("Failed to create magazine:", err);
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "Failed to create magazine. Check the browser console for details.";
+      setError(msg);
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-5 rounded-2xl bg-card border border-border max-w-md space-y-4 shadow-sm">
+    <form onSubmit={handleSubmit} className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-4">
       <div>
         <label className="block text-sm font-medium text-foreground mb-1">Name</label>
         <input
@@ -82,6 +95,8 @@ export function MagazineForm({
           placeholder="Short description for the magazine."
         />
       </div>
+      {error && <p className="text-sm text-red-600">{error}</p>}
+      {success && <p className="text-sm text-green-700">{success}</p>}
       <button
         type="submit"
         disabled={submitting}

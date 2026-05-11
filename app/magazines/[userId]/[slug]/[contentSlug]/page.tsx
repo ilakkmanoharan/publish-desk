@@ -116,22 +116,24 @@ function ArticlePageInner() {
           </div>
         </header>
         <article className={articleGutterClass}>
-          <header className="max-w-3xl mx-auto text-center mb-10 md:mb-14">
-            {paywalled && (
-              <div className="mb-4 flex justify-center">
-                <PremiumBadge />
-              </div>
-            )}
-            <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground tracking-tight leading-tight mb-4">
-              {displayTitle}
-            </h1>
-            {publishedAt && (
-              <p className="text-muted text-sm font-sans">
-                {publishedAt.toLocaleDateString()} · {magazine.name}
-              </p>
-            )}
-            <div className="mt-5 flex justify-center">
-              <ArticleShareMenu title={displayTitle} variant="magazine" />
+          <header className="relative mx-auto mb-10 max-w-4xl md:mb-14">
+            <div className="mx-auto max-w-3xl text-center">
+              {paywalled && (
+                <div className="mb-4 flex justify-center">
+                  <PremiumBadge />
+                </div>
+              )}
+              <h1 className="font-display text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl mb-4">
+                {displayTitle}
+              </h1>
+              {publishedAt && (
+                <p className="font-sans text-sm text-muted">
+                  {publishedAt.toLocaleDateString()} · {magazine.name}
+                </p>
+              )}
+            </div>
+            <div className="mt-4 flex justify-end px-1 sm:px-2 md:absolute md:right-0 md:top-1/2 md:z-20 md:mt-0 md:-translate-y-1/2 md:px-0">
+              <ArticleShareMenu title={displayTitle} />
             </div>
           </header>
           {content.excerpt && (
@@ -176,14 +178,14 @@ function ArticlePageInner() {
             <PremiumBadge />
           </div>
         )}
-        <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">{displayTitle}</h1>
-        <div className="mb-6 flex flex-wrap items-center gap-3">
+        <div className="relative mb-6 max-w-2xl">
+          <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">{displayTitle}</h1>
           {publishedAt ? (
-            <p className="text-muted text-sm">
-              {publishedAt.toLocaleDateString()} · {magazine.name}
-            </p>
+            <p className="text-sm text-muted">{publishedAt.toLocaleDateString()} · {magazine.name}</p>
           ) : null}
-          <ArticleShareMenu title={displayTitle} variant="default" />
+          <div className="mt-3 flex justify-end md:absolute md:right-0 md:top-1/2 md:z-20 md:mt-0 md:-translate-y-1/2">
+            <ArticleShareMenu title={displayTitle} />
+          </div>
         </div>
         {content.excerpt && (
           <p className="text-lg text-muted mb-8">{content.excerpt}</p>

@@ -306,3 +306,53 @@ header.site-header button[aria-label="Open account menu"] img[src="/private/user
   height: auto;
   object-fit: contain;
 }
+
+/* Article share: premium popover + mobile sheet motion */
+@keyframes article-share-popover-in {
+  from {
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.article-share-popover-enter {
+  animation: article-share-popover-in 0.2s ease-out both;
+}
+
+@keyframes article-share-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.article-share-backdrop-enter {
+  animation: article-share-backdrop-in 0.2s ease-out both;
+}
+
+@keyframes article-share-sheet-in {
+  from {
+    transform: translateY(100%);
+    opacity: 0.96;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.article-share-sheet-enter {
+  animation: article-share-sheet-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .article-share-popover-enter,
+  .article-share-backdrop-enter,
+  .article-share-sheet-enter {
+    animation: none;
+  }
+}
