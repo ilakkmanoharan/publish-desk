@@ -80,7 +80,8 @@ function MagazinePageInner() {
               slug: "",
               excerpt: undefined,
               categorySlug: undefined,
-            } as const);
+              visibility: "public" as const,
+            });
           const so = p.sortOrder;
           return {
             id: p.id,
@@ -93,14 +94,18 @@ function MagazinePageInner() {
               slug: c.slug,
               excerpt: c.excerpt,
               categorySlug: c.categorySlug,
+              visibility: c.visibility,
             },
           } satisfies PublicationCard;
         })
       );
       if (!cancelled) {
+        const publicOnly = withContent.filter(
+          (p) => p.content.visibility !== "private_link"
+        );
         setPublications(
           sortPublicationsByMagazineOrder(
-            withContent,
+            publicOnly,
             (p) => toDate(p.publishedAt),
             (p) => slugToTitle(p.displayTitle ?? p.content.title)
           )

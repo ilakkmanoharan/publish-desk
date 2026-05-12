@@ -5,6 +5,7 @@ import path from "path";
 import { getAdminApp, getAdminAuth, getAdminFirestore } from "@/lib/firebase-admin";
 import {
   deskPremiumOnly,
+  deskVisibility,
   getPublishDeskBlock,
   isPublishDeskFrontMatterActive,
   normalizeMagazineSlugs,
@@ -310,6 +311,7 @@ export async function POST(request: Request) {
       }
 
       const premiumOnly = useDesk ? deskPremiumOnly(desk!) : false;
+      const visibility = useDesk ? deskVisibility(desk!) : "public";
       const magazineSlugsFromDesk = useDesk ? normalizeMagazineSlugs(desk!.magazines) : [];
 
       if (!categoryIdsBySlug[categorySlug]) {
@@ -361,6 +363,9 @@ export async function POST(request: Request) {
         .limit(1)
         .get();
 
+      const author: string | null =
+        (typeof frontMatter.author === "string" && frontMatter.author.trim()) || null;
+
       const contentData = {
         userId: uid,
         title,
@@ -371,6 +376,8 @@ export async function POST(request: Request) {
         categorySlug,
         tagIds,
         premiumOnly,
+        ...(author ? { author } : {}),
+        ...(visibility !== "public" ? { visibility } : {}),
         updatedAt: new Date(),
       };
 

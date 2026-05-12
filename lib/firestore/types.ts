@@ -26,8 +26,12 @@ export type Content = {
   premiumOnly?: boolean;
   /** Optional list price in USD dollars (e.g. 100 = $100, 100.55 = $100.55). Omitted or null when not set. */
   premiumPriceUsd?: number | null;
+  /** Author handle or name from front matter (e.g. "ilak"). Mapped to display name at render time. */
+  author?: string;
   /** Public reader layout for this article. `magazine` = default multi-column issue style; `comic` = single column with numbered panels. */
   readerLayout?: "magazine" | "comic";
+  /** Visibility: undefined/"public" = normal, "private_link" = only accessible via direct link with token. */
+  visibility?: "public" | "private_link";
   createdAt: { toDate: () => Date };
   updatedAt: { toDate: () => Date };
 };

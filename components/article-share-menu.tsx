@@ -135,6 +135,16 @@ function IconX() {
   );
 }
 
+function IconPdf() {
+  return (
+    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" aria-hidden className="text-[#7A7268]">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M14 2v6h6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 15h6M9 11h3" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 type MenuRowProps = {
   icon: ReactNode;
   label: string;
@@ -263,7 +273,7 @@ export function ArticleShareMenu({ title }: Props) {
     return () => window.cancelAnimationFrame(id);
   }, [open, isMobile, popoverPos]);
 
-  const itemCount = 6;
+  const itemCount = 7;
 
   const onMenuKeyDown = useCallback(
     (index: number) => (e: React.KeyboardEvent) => {
@@ -330,6 +340,17 @@ export function ArticleShareMenu({ title }: Props) {
     openShareWindow(`https://www.threads.net/intent/post?text=${encodedText}`);
     close();
   };
+
+  const [pdfGenerating, setPdfGenerating] = useState(false);
+
+  const generatePdf = useCallback(() => {
+    setPdfGenerating(true);
+    close();
+    requestAnimationFrame(() => {
+      window.print();
+      setPdfGenerating(false);
+    });
+  }, [close]);
 
   const menuSurfaceClass =
     "rounded-2xl border border-[rgba(92,78,62,0.14)] bg-[#FEFDFB] p-2 shadow-[0_12px_40px_-8px_rgba(45,38,30,0.18),0_4px_14px_-4px_rgba(45,38,30,0.1)]";
@@ -398,6 +419,14 @@ export function ArticleShareMenu({ title }: Props) {
           onClick={shareX}
           onKeyDown={onMenuKeyDown(5)}
         />
+        <div className="mx-2 my-1.5 h-px bg-[rgba(92,78,62,0.1)]" role="separator" />
+        <MenuRow
+          refEl={setItemRef(6)}
+          icon={<IconPdf />}
+          label={pdfGenerating ? "Generating PDF…" : "Generate PDF"}
+          onClick={generatePdf}
+          onKeyDown={onMenuKeyDown(6)}
+        />
       </div>,
       document.body
     );
@@ -464,6 +493,14 @@ export function ArticleShareMenu({ title }: Props) {
             label="Share on X"
             onClick={shareX}
             onKeyDown={onMenuKeyDown(5)}
+          />
+          <div className="mx-2 my-1.5 h-px bg-[rgba(92,78,62,0.1)]" role="separator" />
+          <MenuRow
+            refEl={setItemRef(6)}
+            icon={<IconPdf />}
+            label={pdfGenerating ? "Generating PDF…" : "Generate PDF"}
+            onClick={generatePdf}
+            onKeyDown={onMenuKeyDown(6)}
           />
         </div>
       </>,

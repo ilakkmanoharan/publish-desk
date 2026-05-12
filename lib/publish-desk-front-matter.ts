@@ -38,6 +38,12 @@ export function normalizeMagazineSlugs(v: unknown): string[] {
   return v.map((s) => String(s).trim()).filter(Boolean);
 }
 
+export function deskVisibility(desk: Record<string, unknown>): "public" | "private_link" {
+  const v = String(desk.visibility ?? "").toLowerCase().trim();
+  if (v === "private_link" || v === "private-link" || v === "private") return "private_link";
+  return "public";
+}
+
 export function deskPremiumOnly(desk: Record<string, unknown>): boolean {
   if (desk.premium === true || desk.premium === "true") return true;
   const access = String(desk.access ?? "").toLowerCase();

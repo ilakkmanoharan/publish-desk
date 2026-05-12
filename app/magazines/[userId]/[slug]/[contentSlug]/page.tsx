@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { getMagazineByUserIdAndSlug, getPublicationByContentSlug } from "@/lib/firestore/collections";
 import { slugToTitle } from "@/lib/format-title";
 import { buildMarkdownTeaser } from "@/lib/premium-teaser";
+import { getAuthorDisplayName } from "@/lib/author-display";
 import { ArticleBody } from "./article-body";
 import { ArticleBodyComic } from "./article-body-comic";
 import { ArticleBodyMagazine } from "./article-body-magazine";
@@ -34,9 +35,11 @@ function ArticlePageInner() {
     title: string;
     body: string;
     excerpt?: string;
+    author?: string;
     premiumOnly?: boolean;
     premiumPriceUsd?: number | null;
     readerLayout?: "magazine" | "comic";
+    visibility?: "private_link";
   } | null>(null);
   const [displayTitleOverride, setDisplayTitleOverride] = useState<string | null>(null);
   const [publishedAt, setPublishedAt] = useState<Date | null>(null);
@@ -92,12 +95,35 @@ function ArticlePageInner() {
   if (loading) return <div className="min-h-screen bg-background p-8">Loading...</div>;
   if (!magazine || !content) return <div className="min-h-screen bg-background p-8">Article not found.</div>;
 
+  // Private-link-only: check access token
+  if (content.visibility === "private_link") {
+    const accessToken = searchParams.get("access");
+    const isOwner = user?.uid === userId;
+    if (!isOwner && !accessToken) {
+      return (
+        <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
+          <h1 className="text-2xl font-bold text-foreground">Private Article</h1>
+          <p className="mt-3 max-w-md text-muted">
+            This article is private. Please use the private access link provided by the author.
+          </p>
+        </div>
+      );
+    }
+  }
+
   const titleSource = displayTitleOverride || content.title;
   const displayTitle = slugToTitle(titleSource);
+  const authorName = getAuthorDisplayName(content.author);
   const listReturn = searchParams.get("view") === "list";
   const magazineBackHref = layoutMagazine
     ? `/magazines/${userId}/${slug}`
     : `/magazines/${userId}/${slug}${listReturn ? "?view=list" : ""}`;
+
+  const authorLine = (
+    <p className="mt-3 mb-2 font-sans text-[17px] leading-snug text-[#4b5563]">
+      <span className="font-medium">Author:</span> {authorName}
+    </p>
+  );
 
   if (layoutMagazine) {
     return (
@@ -123,9 +149,10 @@ function ArticlePageInner() {
                   <PremiumBadge />
                 </div>
               )}
-              <h1 className="font-display text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl mb-4">
+              <h1 className="font-display text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl mb-1">
                 {displayTitle}
               </h1>
+              {authorLine}
               {publishedAt && (
                 <p className="font-sans text-sm text-muted">
                   {publishedAt.toLocaleDateString()} · {magazine.name}
@@ -179,7 +206,8 @@ function ArticlePageInner() {
           </div>
         )}
         <div className="relative mb-6 max-w-2xl">
-          <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">{displayTitle}</h1>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight mb-1">{displayTitle}</h1>
+          {authorLine}
           {publishedAt ? (
             <p className="text-sm text-muted">{publishedAt.toLocaleDateString()} · {magazine.name}</p>
           ) : null}

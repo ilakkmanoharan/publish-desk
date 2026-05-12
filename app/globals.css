@@ -356,3 +356,17 @@ header.site-header button[aria-label="Open account menu"] img[src="/private/user
     animation: none;
   }
 }
+
+/* Print / Generate PDF — clean article output */
+@media print {
+  body { background: white !important; }
+  header, footer, nav,
+  .article-share-trigger,
+  .article-share-popover-enter,
+  .article-share-sheet-enter,
+  .article-share-backdrop-enter,
+  .profile-dropdown-panel { display: none !important; }
+  article { max-width: 100% !important; padding: 0 !important; }
+  a { color: inherit !important; text-decoration: none !important; }
+  * { box-shadow: none !important; }
+}

@@ -147,12 +147,14 @@ export async function getPublicationByContentSlug(
       title: (contentData?.title as string) ?? "",
       body: (contentData?.body as string) ?? "",
       excerpt: contentData?.excerpt as string | undefined,
+      author: (contentData?.author as string | undefined) ?? undefined,
       premiumOnly: contentData?.premiumOnly === true,
       premiumPriceUsd:
         typeof contentData?.premiumPriceUsd === "number" && !Number.isNaN(contentData.premiumPriceUsd)
           ? contentData.premiumPriceUsd
           : null,
       readerLayout,
+      visibility: (contentData?.visibility as string | undefined) === "private_link" ? "private_link" as const : undefined,
     },
   };
 }
@@ -165,6 +167,7 @@ export async function getContentById(
   slug: string;
   excerpt?: string;
   categorySlug?: string;
+  visibility?: "public" | "private_link";
 } | null> {
   const ref = doc(db(), COLLECTIONS.content, contentId);
   const snap = await getDoc(ref);
@@ -176,6 +179,7 @@ export async function getContentById(
     slug: (data?.slug as string) ?? "",
     excerpt: data?.excerpt as string | undefined,
     categorySlug: data?.categorySlug as string | undefined,
+    visibility: (data?.visibility as string) === "private_link" ? "private_link" : "public",
   };
 }
 

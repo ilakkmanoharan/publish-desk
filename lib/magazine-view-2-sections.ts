@@ -6,7 +6,7 @@ export type PublicationCard = {
   displayTitle?: string | null;
   sortOrder?: number;
   publishedAt?: unknown;
-  content: { title: string; slug: string; excerpt?: string; categorySlug?: string };
+  content: { title: string; slug: string; excerpt?: string; categorySlug?: string; visibility?: "public" | "private_link" };
 };
 
 /**
