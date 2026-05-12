@@ -343,14 +343,34 @@ export function ArticleShareMenu({ title }: Props) {
 
   const [pdfGenerating, setPdfGenerating] = useState(false);
 
-  const generatePdf = useCallback(() => {
+  const generatePdf = useCallback(async () => {
     setPdfGenerating(true);
     close();
-    requestAnimationFrame(() => {
+
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+      const article = document.querySelector("article");
+      if (!article) {
+        setPdfGenerating(false);
+        return;
+      }
+
+      const slug = pathname.split("/").pop() || "article";
+      const opts: Record<string, unknown> = {
+        margin: [12, 10, 12, 10],
+        filename: `${slug}.pdf`,
+        image: { type: "jpeg", quality: 0.95 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+      };
+      await html2pdf().set(opts).from(article).save();
+    } catch {
       window.print();
+    } finally {
       setPdfGenerating(false);
-    });
-  }, [close]);
+    }
+  }, [close, pathname]);
 
   const menuSurfaceClass =
     "rounded-2xl border border-[rgba(92,78,62,0.14)] bg-[#FEFDFB] p-2 shadow-[0_12px_40px_-8px_rgba(45,38,30,0.18),0_4px_14px_-4px_rgba(45,38,30,0.1)]";
