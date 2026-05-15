@@ -8,6 +8,7 @@ private/
 # Documentation (keep .md files in private/ so they are not pushed to GitHub)
 *.md
 !docs/article-template.md
+!docs/EDITORIAL.md
 node_modules/
 .next/
 out/
