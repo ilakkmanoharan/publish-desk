@@ -377,7 +377,7 @@ export async function POST(request: Request) {
         tagIds,
         premiumOnly,
         ...(author ? { author } : {}),
-        ...(visibility !== "public" ? { visibility } : {}),
+        ...(useDesk ? { visibility } : {}),
         updatedAt: new Date(),
       };
 
