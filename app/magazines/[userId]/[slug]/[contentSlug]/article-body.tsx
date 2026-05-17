@@ -1,4 +1,5 @@
 import ReactMarkdown from "react-markdown";
+import { articleMarkdownComponents, articleMarkdownRehypePlugins } from "@/lib/article-markdown";
 
 const proseClasses = `
   prose prose-invert max-w-none
@@ -19,7 +20,9 @@ const proseClasses = `
 export function ArticleBody({ content }: { content: string }) {
   return (
     <div className={proseClasses}>
-      <ReactMarkdown>{content}</ReactMarkdown>
+      <ReactMarkdown rehypePlugins={articleMarkdownRehypePlugins} components={articleMarkdownComponents}>
+        {content}
+      </ReactMarkdown>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import {
   MagazineMarkdownImage,
   unwrapParagraphIfOnlyMarkdownImage,
 } from "@/components/magazine-view-2/MagazineMarkdownImage";
+import { articleMarkdownComponents, articleMarkdownRehypePlugins } from "@/lib/article-markdown";
 
 const proseClasses = `
   magazine-reading-body
@@ -25,7 +26,9 @@ export function ArticleBodyMagazine({ content }: { content: string }) {
   return (
     <div className={proseClasses}>
       <ReactMarkdown
+        rehypePlugins={articleMarkdownRehypePlugins}
         components={{
+          ...articleMarkdownComponents,
           p: ({ children, ...props }) => {
             const unwrapped = unwrapParagraphIfOnlyMarkdownImage(children);
             if (unwrapped !== undefined) return unwrapped;

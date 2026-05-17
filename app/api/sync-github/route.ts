@@ -16,6 +16,21 @@ const GITHUB_API = "https://api.github.com";
 
 type GitHubTreeItem = { path: string; type: string; sha: string };
 
+function resolveRelativeRepoAssetUrl(
+  rawUrl: string,
+  assetBaseUrl: string,
+  baseDir: string
+): string | null {
+  const trimmed = String(rawUrl).trim().replace(/^<|>$/g, "").replace(/^"(.*)"$/g, "$1").replace(/^'(.*)'$/g, "$1");
+  if (/^(https?:)?\/\//i.test(trimmed) || /^data:/i.test(trimmed) || /^mailto:/i.test(trimmed)) return null;
+  if (trimmed.startsWith("#")) return null;
+  const joined = baseDir
+    ? path.posix.normalize(path.posix.join(baseDir, trimmed))
+    : path.posix.normalize(trimmed);
+  if (joined.startsWith("..")) return null;
+  return `${assetBaseUrl}/${joined}`;
+}
+
 function rewriteRelativeMarkdownImageUrls(opts: {
   markdown: string;
   assetBaseUrl: string; // e.g. https://cdn.jsdelivr.net/gh/<owner>/<repo>@<sha>
@@ -29,29 +44,43 @@ function rewriteRelativeMarkdownImageUrls(opts: {
   // Match Markdown images: ![alt](url) including optional <...> wrapping.
   // We only rewrite relative paths (./, ../, or bare filenames).
   const next = markdown.replace(/!\[([^\]]*)\]\(([^)\r\n]+)\)/g, (full, alt, rawUrl) => {
-    const trimmed = String(rawUrl).trim().replace(/^<|>$/g, "").replace(/^"(.*)"$/g, "$1").replace(/^'(.*)'$/g, "$1");
-
-    // Leave absolute / special URLs untouched.
-    if (/^(https?:)?\/\//i.test(trimmed) || /^data:/i.test(trimmed) || /^mailto:/i.test(trimmed)) return full;
-
-    // Skip in-page anchors.
-    if (trimmed.startsWith("#")) return full;
-
-    // Only handle relative (including "./", "../") and bare file names.
-    const joined = baseDir
-      ? path.posix.normalize(path.posix.join(baseDir, trimmed))
-      : path.posix.normalize(trimmed);
-
-    // Guard: normalize can yield paths like "../x" — don't allow escape above repo root.
-    if (joined.startsWith("..")) return full;
-
-    const absolute = `${assetBaseUrl}/${joined}`;
+    const absolute = resolveRelativeRepoAssetUrl(rawUrl, assetBaseUrl, baseDir);
+    if (!absolute) return full;
+    const trimmed = String(rawUrl).trim();
     const from = `![${alt}](${trimmed})`;
     const to = `![${alt}](${absolute})`;
     rewrittenCount += 1;
     if (samples.length < 6) samples.push({ from, to });
     return to;
   });
+  return { markdown: next, rewrittenCount, samples };
+}
+
+function rewriteRelativeMarkdownAssetUrls(opts: {
+  markdown: string;
+  assetBaseUrl: string;
+  filePathInRepo: string;
+}): { markdown: string; rewrittenCount: number; samples: Array<{ from: string; to: string }> } {
+  const { assetBaseUrl, filePathInRepo } = opts;
+  const baseDir = filePathInRepo.split("/").slice(0, -1).join("/");
+  const images = rewriteRelativeMarkdownImageUrls({
+    markdown: opts.markdown,
+    assetBaseUrl,
+    filePathInRepo,
+  });
+  let rewrittenCount = images.rewrittenCount;
+  const samples = [...images.samples];
+
+  const next = images.markdown.replace(
+    /(<(?:video|source)\b[^>]*\s(?:src|poster)=["'])([^"']+)(["'])/gi,
+    (full, prefix, rawUrl, suffix) => {
+      const absolute = resolveRelativeRepoAssetUrl(rawUrl, assetBaseUrl, baseDir);
+      if (!absolute) return full;
+      rewrittenCount += 1;
+      if (samples.length < 8) samples.push({ from: rawUrl, to: absolute });
+      return `${prefix}${absolute}${suffix}`;
+    }
+  );
   return { markdown: next, rewrittenCount, samples };
 }
 
@@ -270,7 +299,7 @@ export async function POST(request: Request) {
       const useDesk = Boolean(desk);
       // Use an immutable, cached CDN URL pinned to commit SHA so images load reliably.
       const assetBaseUrl = `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${commitSha}`;
-      const rewrite = rewriteRelativeMarkdownImageUrls({
+      const rewrite = rewriteRelativeMarkdownAssetUrls({
         markdown: body,
         assetBaseUrl,
         filePathInRepo: path,
